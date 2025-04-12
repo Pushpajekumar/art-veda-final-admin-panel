@@ -23,7 +23,7 @@ import {
   CardHeader,
 } from "./ui/card";
 import { toast } from "sonner";
-import { account } from "@/context/appwrite";
+import { account } from "../appwrite";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -101,7 +101,7 @@ export default function LoginCard() {
               )}
             />
             <Button type="submit" disabled={isLoading} isLoading={isLoading}>
-              Submit
+              Login
             </Button>
           </form>
         </Form>
