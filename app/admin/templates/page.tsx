@@ -1,10 +1,10 @@
+import TypeOfPost from "@/components/templates/type-of-post";
 import React from "react";
 
 const page = () => {
   return (
     <div>
-      <h1>Admin Templates</h1>
-      <p>Manage your templates here.</p>
+      <TypeOfPost />
     </div>
   );
 };

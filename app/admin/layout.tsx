@@ -6,7 +6,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="grow-1">{children}</main>
+      <main className="grow-1 bg-neutral-100">{children}</main>
     </SidebarProvider>
   );
 };
