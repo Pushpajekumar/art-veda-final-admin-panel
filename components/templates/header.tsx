@@ -6,40 +6,28 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { useEditorStore } from "@/store/editor-store";
 import {
   ChevronDown,
   Download,
   Eye,
   Loader2,
-  LogOut,
   Pencil,
   Save,
-  SaveOff,
-  Share,
-  Star,
+  SaveIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
+
 import ExportModal from "./export-modal";
+import { database, ID, storage } from "@/appwrite";
+import { Button } from "../ui/button";
 
 function Header() {
-  const {
-    isEditing,
-    setIsEditing,
-    name,
-    setName,
-    canvas,
-    saveStatus,
-    markAsModified,
-    designId,
-    userDesigns,
-  } = useEditorStore();
+  const { isEditing, setIsEditing, name, canvas, markAsModified, designId } =
+    useEditorStore();
   const [showExportModal, setShowExportModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!canvas) return;
@@ -59,8 +47,56 @@ function Header() {
     setShowExportModal(true);
   };
 
+  const handleSave = async () => {
+    if (!canvas) return;
+    setIsLoading(true);
+    try {
+      const dataUrl = canvas?.toDataURL({
+        format: "png",
+        quality: 1,
+        multiplier: 1,
+      });
+
+      console.log(dataUrl);
+
+      if (dataUrl) {
+        // Convert dataUrl to a Blob, then to a File object
+        const blob = await fetch(dataUrl).then((res) => res.blob());
+        const file = new File([blob], "design.png", { type: "image/png" });
+
+        const uploadedImage = await storage.createFile(
+          process.env.NEXT_PUBLIC_BUCKET_ID as string,
+          ID.unique(),
+          file
+        );
+
+        const imageUrl = `https://cloud.appwrite.io/v1/storage/buckets/${process.env.NEXT_PUBLIC_BUCKET_ID}/files/${uploadedImage.$id}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
+
+        console.log(imageUrl);
+
+        if (imageUrl) {
+          await database.updateDocument(
+            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+            process.env.NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID as string,
+            designId!,
+            {
+              previewImageID: uploadedImage.$id,
+              previewImage: imageUrl,
+            }
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error saving design", error);
+      toast.error("Failed to save design");
+    } finally {
+      setIsLoading(false);
+      toast.success("Design saved successfully");
+    }
+  };
+
   return (
-    <header className="header-gradient bg-blue-500 header flex items-center justify-between px-4 h-14">
+    <header className="header-gradient  header flex items-center justify-between px-4 h-14">
       <div className="flex items-center space-x-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild={true}>
@@ -80,28 +116,10 @@ function Header() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <button
-          className={
-            "relative flex items-center justify-center p-1.5 rounded-md hover:bg-muted transition-colors"
-          }
-          title={saveStatus !== "Saving..." ? "Save" : saveStatus}
-          disabled={saveStatus === "Saving..."}
-        >
-          {saveStatus === "Saving..." ? (
-            <div className="relative flex items-center">
-              <Loader2 className="h-5 w-5 animate-spin text-white" />
-              <span className="sr-only">Saving...</span>
-            </div>
-          ) : (
-            <Save
-              className={cn("h-5 w-5", saveStatus === "Saved" && "text-white")}
-            />
-          )}
-
-          {saveStatus === "Saving..." && (
-            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />
-          )}
-        </button>
+        <Button isLoading={isLoading} onClick={handleSave}>
+          {" "}
+          <SaveIcon /> Save
+        </Button>
         <button
           onClick={handleExport}
           className="header-button ml-3 relative"

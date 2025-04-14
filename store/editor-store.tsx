@@ -1,7 +1,6 @@
 "use client";
 
 import { centerCanvas } from "@/utils/fabric-utils";
-import { saveCanvasState } from "@/utils/design-service";
 import { debounce } from "lodash";
 import { create } from "zustand";
 import { Canvas } from "fabric";
@@ -22,8 +21,7 @@ interface EditorState {
   lastModified: number;
   isModified: boolean;
   markAsModified: () => void;
-  saveToServer: () => Promise<any>;
-  debouncedSaveToServer: () => void;
+
   userDesigns: any[];
   setUserDesigns: (data: any[]) => void;
   userDesignsLoading: boolean;
@@ -70,40 +68,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         saveStatus: "Saving...",
         isModified: true,
       });
-
-      get().debouncedSaveToServer();
     } else {
       console.error("No design ID Available");
     }
   },
-
-  saveToServer: async () => {
-    const designId = get().designId;
-    const canvas = get().canvas;
-
-    if (!canvas || !designId) {
-      console.log("No design ID Available or canvas instance is not available");
-      return null;
-    }
-
-    try {
-      const savedDesign = await saveCanvasState(canvas, designId, get().name);
-
-      set({
-        saveStatus: "Saved",
-        isModified: false,
-      });
-
-      return savedDesign;
-    } catch (e) {
-      set({ saveStatus: "Error" });
-      return null;
-    }
-  },
-
-  debouncedSaveToServer: debounce(() => {
-    get().saveToServer();
-  }, 500),
 
   userDesigns: [],
   setUserDesigns: (data) => set({ userDesigns: data }),

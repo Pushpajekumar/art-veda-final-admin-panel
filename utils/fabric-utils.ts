@@ -96,13 +96,15 @@ export const addImageToCanvas = async (
 
     return new Promise((resolve, reject) => {
       imgObj.onload = () => {
-        let image = new FabricImage(imgObj);
+        let image = new FabricImage(imgObj, {
+          crossOrigin: "anonymous",
+        });
         image.set({
           id: `image-${Date.now()}`,
           top: 100,
           left: 100,
           padding: 10,
-          cornorSize: 10,
+          cornerSize: 10,
         });
 
         const maxDimension = 400;
