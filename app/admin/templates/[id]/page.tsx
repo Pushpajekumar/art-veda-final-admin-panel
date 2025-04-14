@@ -1,3 +1,5 @@
+import { database } from "@/appwrite";
+import Editor from "@/components/templates/editor";
 import React from "react";
 
 interface Props {
@@ -9,10 +11,24 @@ interface Props {
 
 const page = async ({ params }: Props) => {
   const { id } = await params;
+
+  // Here you can use the id to fetch data or perform any operations
+  const templates = await database.getDocument(
+    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+    process.env.NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID!,
+    id
+  );
+
+  console.log(templates);
+
   return (
     <div>
-      <p>template Details here</p>
-      <p>Template ID: {id}</p>
+      <Editor
+        canvasData={templates.template}
+        designId={id}
+        canvasWidth={templates.width}
+        canvasHeight={templates.height}
+      />
     </div>
   );
 };
