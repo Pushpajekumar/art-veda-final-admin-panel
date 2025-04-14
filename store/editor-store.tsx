@@ -24,8 +24,6 @@ interface EditorState {
   markAsModified: () => void;
   saveToServer: () => Promise<any>;
   debouncedSaveToServer: () => void;
-  userSubscription: any;
-  setUserSubscription: (data: any) => void;
   userDesigns: any[];
   setUserDesigns: (data: any[]) => void;
   userDesignsLoading: boolean;
@@ -106,9 +104,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   debouncedSaveToServer: debounce(() => {
     get().saveToServer();
   }, 500),
-
-  userSubscription: null,
-  setUserSubscription: (data) => set({ userSubscription: data }),
 
   userDesigns: [],
   setUserDesigns: (data) => set({ userDesigns: data }),

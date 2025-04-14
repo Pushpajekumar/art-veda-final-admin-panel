@@ -38,7 +38,6 @@ function Header() {
     markAsModified,
     designId,
     userDesigns,
-    userSubscription,
   } = useEditorStore();
   const [showExportModal, setShowExportModal] = useState(false);
 
@@ -57,18 +56,11 @@ function Header() {
   }, [name, canvas, designId]);
 
   const handleExport = () => {
-    if (userDesigns?.length >= 5 && !userSubscription.isPremium) {
-      toast.error("Please upgrade to premium!", {
-        description: "You need to upgrade to premium to create more designs",
-      });
-
-      return;
-    }
     setShowExportModal(true);
   };
 
   return (
-    <header className="header-gradient bg-red-600 header flex items-center justify-between px-4 h-14">
+    <header className="header-gradient bg-blue-500 header flex items-center justify-between px-4 h-14">
       <div className="flex items-center space-x-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild={true}>
@@ -119,7 +111,10 @@ function Header() {
         </button>
       </div>
 
-      <ExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+      />
     </header>
   );
 }

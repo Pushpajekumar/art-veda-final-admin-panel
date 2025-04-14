@@ -1,3 +1,4 @@
+import { database } from "@/appwrite";
 import fabric from "fabric";
 
 interface DesignData {
@@ -8,10 +9,21 @@ interface DesignData {
 }
 
 async function saveDesign(designData: DesignData, designId: string | null) {
-  // Implementation needed here
-  // This is a placeholder function - replace with actual implementation
-  console.log("Saving design:", designData, designId);
-  return true;
+ try {
+  await database.updateDocument(
+    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+    process.env.NEXT_PUBLIC_APPWRITE_DESIGNS_COLLECTION_ID!,
+    designId!,
+    {
+      template: designData.canvasData,
+      previewImage: "",
+    }
+  )
+ } catch (error) {
+   console.error("Error saving design:", error);
+   throw error;
+  
+ }
 }
 
 export async function saveCanvasState(
