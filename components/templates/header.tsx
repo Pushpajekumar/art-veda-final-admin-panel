@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import ExportModal from "./export-modal";
 
 function Header() {
   const {
@@ -38,7 +39,6 @@ function Header() {
     designId,
     userDesigns,
     userSubscription,
-    setShowPremiumModal,
   } = useEditorStore();
   const [showExportModal, setShowExportModal] = useState(false);
 
@@ -68,7 +68,7 @@ function Header() {
   };
 
   return (
-    <header className="header-gradient header flex items-center justify-between px-4 h-14">
+    <header className="header-gradient bg-red-600 header flex items-center justify-between px-4 h-14">
       <div className="flex items-center space-x-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild={true}>
@@ -119,8 +119,7 @@ function Header() {
         </button>
       </div>
 
-      {/* //TODO: */}
-      {/* <ExportModal isOpen={showExportModal} onClose={setShowExportModal} /> */}
+      <ExportModal isOpen={showExportModal} onClose={() => setShowExportModal(false)} />
     </header>
   );
 }
