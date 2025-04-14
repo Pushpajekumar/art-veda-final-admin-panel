@@ -3,6 +3,7 @@ import { useEditorStore } from "@/store/editor-store";
 import React, { use, useCallback } from "react";
 import Canvas from "./canvas";
 import { useRouter } from "next/navigation";
+import Sidebar from "./sidebar";
 
 interface EditorProops {
   canvasData: string;
@@ -175,8 +176,7 @@ const Editor = ({
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <div className="flex flex-1 overflow-hidden">
-        {/* {isEditing && <Sidebar />} */}
-        <p>hii pushpaje</p>
+        {isEditing && <Sidebar />}
 
         <div className="flex-1 flex flex-col overflow-hidden relative">
           <div className="flex-1 overflow-hidden bg-[#f0f0f0] flex items-center justify-center">

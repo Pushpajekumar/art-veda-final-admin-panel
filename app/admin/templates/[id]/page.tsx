@@ -1,5 +1,6 @@
 import { database } from "@/appwrite";
 import Editor from "@/components/templates/editor";
+import Header from "@/components/templates/header";
 import React from "react";
 
 interface Props {
@@ -23,6 +24,9 @@ const page = async ({ params }: Props) => {
 
   return (
     <div>
+      <div>
+        <Header />
+      </div>
       <Editor
         canvasData={templates.template}
         designId={id}
