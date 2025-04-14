@@ -4,6 +4,7 @@ import React, { use, useCallback } from "react";
 import Canvas from "./canvas";
 import { useRouter } from "next/navigation";
 import Sidebar from "./sidebar";
+import Properties from "./properties";
 
 interface EditorProops {
   canvasData: string;
@@ -184,7 +185,7 @@ const Editor = ({
           </div>
         </div>
       </div>
-      {/* {showProperties && isEditing && <Properties />} */}
+      {showProperties && isEditing && <Properties />}
     </div>
   );
 };

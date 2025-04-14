@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  ArrowLeft,
-  ChevronLeft,
-  Grid,
-  Pencil,
-  Settings,
-  Sparkle,
-  Type,
-  Upload,
-} from "lucide-react";
+import { ArrowLeft, ChevronLeft, Type, Upload } from "lucide-react";
 import { useState } from "react";
 
 import { useEditorStore } from "@/store/editor-store";
@@ -18,7 +9,7 @@ import UploadPanel from "./upload";
 
 function Sidebar() {
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-  const [activeSidebar, setActiveSidebar] = useState(null);
+  const [activeSidebar, setActiveSidebar] = useState<string | null>(null);
 
   const sidebarItems = [
     {
@@ -35,7 +26,7 @@ function Sidebar() {
     },
   ];
 
-  const handleItemClick = (id) => {
+  const handleItemClick = (id: string) => {
     if (id === activeSidebar && !isPanelCollapsed) return;
 
     setActiveSidebar(id);
@@ -82,7 +73,7 @@ function Sidebar() {
             <button className="back-button" onClick={closeSecondaryPanel}>
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <span className="panel-title">{activeItem.label}</span>
+            <span className="panel-title">{activeItem?.label}</span>
           </div>
           <div className="panel-content">{activeItem?.panel()}</div>
           <button className="collapse-button" onClick={togglePanelCollapse}>
