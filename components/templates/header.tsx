@@ -74,12 +74,15 @@ function Header() {
 
         console.log(imageUrl);
 
+        const canvasData = canvas.toObject(["id", "filters"]);
+
         if (imageUrl) {
           await database.updateDocument(
             process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
             process.env.NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID as string,
             designId!,
             {
+              template: JSON.stringify(canvasData),
               previewImageID: uploadedImage.$id,
               previewImage: imageUrl,
             }
