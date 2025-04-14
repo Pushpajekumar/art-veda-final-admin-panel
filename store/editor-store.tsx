@@ -8,7 +8,7 @@ import { Canvas } from "fabric";
 
 interface EditorState {
   canvas: Canvas | null;
-  setCanvas: (canvas: Canvas) => void;
+  setCanvas: (canvas: Canvas | null) => void;
   designId: string | null;
   setDesignId: (id: string | null) => void;
   isEditing: boolean;
@@ -39,7 +39,7 @@ interface EditorState {
 
 export const useEditorStore = create<EditorState>((set, get) => ({
   canvas: null,
-  setCanvas: (canvas: Canvas) => {
+  setCanvas: (canvas: Canvas | null) => {
     set({ canvas });
     if (canvas) {
       centerCanvas(canvas);
