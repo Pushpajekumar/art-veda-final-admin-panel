@@ -53,7 +53,7 @@ export default function LoginCard() {
       setIsLoading(true);
       await account.createEmailPasswordSession(values.email, values.password);
       toast.success("Login successful");
-      router.push("/admin"); // Redirect to admin panel
+      router.push("/admin/templates"); // Redirect to admin panel
     } catch (error) {
       console.error("Login failed:", error);
       toast.error("Login failed. Please check your credentials.");
