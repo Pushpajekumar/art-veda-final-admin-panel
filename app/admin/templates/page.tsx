@@ -6,7 +6,7 @@ const page = () => {
   return (
     <div>
       <TypeOfPost />
-      <div className="p-3 bg-white">
+      <div className="">
         <Templates />
       </div>
     </div>
