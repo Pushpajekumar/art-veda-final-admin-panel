@@ -31,8 +31,6 @@ const Editor = ({
     setShowProperties,
     showProperties,
     isEditing,
-    setShowPremiumModal,
-    showPremiumModal,
   } = useEditorStore();
 
   React.useEffect(() => {
@@ -86,43 +84,53 @@ const Editor = ({
 
         try {
           if (design) {
-            canvas.clear();
-            if (canvasWidth && canvasHeight) {
-              canvas.setDimensions({
-                width: canvasWidth,
-                height: canvasHeight,
-              });
-            }
+        canvas.clear();
+        // Set dimensions at half size
+        const scaledWidth = canvasWidth * 0.5;
+        const scaledHeight = canvasHeight * 0.5;
+        
+        if (canvasWidth && canvasHeight) {
+          canvas.setDimensions({
+            width: scaledWidth,
+            height: scaledHeight,
+          });
 
-            const canvasData =
-              typeof design === "string" ? JSON.parse(design) : design;
+          console.log("Canvas dimensions set at half size");
+        }
 
-            console.log(canvasData, "canvasData");
+        const canvasData =
+          typeof design === "string" ? JSON.parse(design) : design;
 
-            const hasObjects =
-              canvasData.objects && canvasData.objects.length > 0;
+        const hasObjects =
+          canvasData.objects && canvasData.objects.length > 0;
 
-            if (canvasData.background) {
-              canvas.backgroundColor = canvasData.background;
-            } else {
-              canvas.backgroundColor = "#ffffff";
-            }
+        if (canvasData.background) {
+          canvas.backgroundColor = canvasData.background;
+        } else {
+          canvas.backgroundColor = "#ffffff";
+        }
 
-            if (!hasObjects) {
-              canvas.renderAll();
-              return true;
-            }
+        if (!hasObjects) {
+          canvas.renderAll();
+          return true;
+        }
 
-            canvas
-              .loadFromJSON(design)
-              .then((canvas) => canvas.requestRenderAll());
+        // Load the JSON and scale all objects to 0.5x
+        canvas.loadFromJSON(design, () => {
+          // Scale down all objects
+          canvas.getObjects().forEach((obj) => {
+            obj.scale(0.5);
+            obj.setCoords();
+          });
+          canvas.requestRenderAll();
+        });
           } else {
-            console.log("no canvas data");
-            canvas.clear();
-            canvas.setWidth(canvasWidth);
-            canvas.setHeight(canvasHeight);
-            canvas.backgroundColor = "#ffffff";
-            canvas.renderAll();
+        console.log("no canvas data");
+        canvas.clear();
+        canvas.setWidth(canvasWidth * 0.5);
+        canvas.setHeight(canvasHeight * 0.5);
+        canvas.backgroundColor = "#ffffff";
+        canvas.renderAll();
           }
         } catch (e) {
           console.error("Error loading canvas", e);
@@ -130,6 +138,19 @@ const Editor = ({
         } finally {
           setLoading(false);
         }
+      } else {
+        console.log("no design data");
+        canvas.clear();
+        console.log(canvasWidth, canvasHeight, "canvasWidth canvasHeight");
+        // Set dimensions at half size
+        canvas.setDimensions({
+          width: canvasWidth * 0.5,
+          height: canvasHeight * 0.5,
+        });
+        console.log("canvas dimensions set at half size");
+        canvas.backgroundColor = "#ffffff";
+        console.log(canvas, "canvas");
+        canvas.renderAll();
       }
     } catch (e) {
       console.error("Failed to load design", e);

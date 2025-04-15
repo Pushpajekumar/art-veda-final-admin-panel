@@ -100,7 +100,7 @@ const Canvas = () => {
 
   return (
     <div
-      className="relative  w-full h-[600px] overflow-auto"
+      className="relative  w-full min-h-full overflow-auto"
       ref={canvasContainerRef}
     >
       <canvas ref={canvasRef} />
