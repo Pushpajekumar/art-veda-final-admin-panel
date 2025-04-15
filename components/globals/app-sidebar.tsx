@@ -9,6 +9,7 @@ import {
   Search,
   Settings,
   Users,
+  UsersRound,
 } from "lucide-react";
 import {
   Sidebar,
@@ -38,6 +39,16 @@ const items = [
     title: "Users",
     url: "/admin/users",
     icon: Users,
+  },
+  {
+    title: "Categories",
+    url: "/admin/categories",
+    icon: Inbox,
+  },
+  {
+    title: "Subcategories",
+    url: "/admin/sub-categories",
+    icon: UsersRound,
   },
 ];
 
