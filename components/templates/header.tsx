@@ -7,25 +7,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useEditorStore } from "@/store/editor-store";
-import {
-  ChevronDown,
-  Download,
-  Eye,
-  Loader2,
-  Pencil,
-  Save,
-  SaveIcon,
-} from "lucide-react";
+import { ChevronDown, Download, Eye, Pencil, SaveIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import ExportModal from "./export-modal";
 import { database, ID, storage } from "@/appwrite";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 function Header() {
-  const { isEditing, setIsEditing, name, canvas, markAsModified, designId } =
-    useEditorStore();
+  const {
+    isEditing,
+    setIsEditing,
+    name,
+    canvas,
+    markAsModified,
+    designId,
+    setName,
+  } = useEditorStore();
   const [showExportModal, setShowExportModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -85,6 +85,7 @@ function Header() {
               template: JSON.stringify(canvasData),
               previewImageID: uploadedImage.$id,
               previewImage: imageUrl,
+              name,
             }
           );
         }
@@ -100,13 +101,13 @@ function Header() {
 
   return (
     <header className="header-gradient  header flex items-center justify-between px-4 h-14">
-      <div className="flex items-center space-x-2">
+      <div className="flex w-full justify-between items-center space-x-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild={true}>
-            <button className="header-button flex items-center text-white">
+            <Button className="flex items-center " variant={"secondary"}>
               <span>{isEditing ? "Editing" : "Viewing"}</span>
               <ChevronDown className="ml-1 h-4 w-4" />
-            </button>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem onClick={() => setIsEditing(true)}>
@@ -119,17 +120,27 @@ function Header() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button isLoading={isLoading} onClick={handleSave}>
-          {" "}
-          <SaveIcon /> Save
-        </Button>
-        <button
-          onClick={handleExport}
-          className="header-button ml-3 relative"
-          title="Export"
-        >
-          <Download className="w-5 h-5" />
-        </button>
+        <div className="flex-1 flex justify-center max-w-md">
+          <Input
+            className="w-full bg-white text-neutral-900 border border-neutral-300 focus:ring-0 focus:border-neutral-500"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <div>
+          <Button isLoading={isLoading} onClick={handleSave}>
+            {" "}
+            <SaveIcon /> Save
+          </Button>
+          <Button
+            isLoading={isLoading}
+            onClick={handleExport}
+            className=" ml-3 relative bg-blue-500 text-white hover:bg-blue-600"
+            variant={"secondary"}
+          >
+            <Download className="w-5 h-5" /> Export
+          </Button>
+        </div>
       </div>
 
       <ExportModal
