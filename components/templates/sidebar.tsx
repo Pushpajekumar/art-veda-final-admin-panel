@@ -1,11 +1,12 @@
 "use client";
 
-import { ArrowLeft, ChevronLeft, Type, Upload } from "lucide-react";
+import { ArrowLeft, ChevronLeft, Type, Upload, Image } from "lucide-react";
 import { useState } from "react";
 
 import { useEditorStore } from "@/store/editor-store";
 import TextPanel from "./text";
 import UploadPanel from "./upload";
+import BackgroundPanel from "./background";
 
 function Sidebar() {
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
@@ -23,6 +24,12 @@ function Sidebar() {
       icon: Upload,
       label: "Uploads",
       panel: () => <UploadPanel />,
+    },
+    {
+      id: "background",
+      icon: Image,
+      label: "Background",
+      panel: () => <BackgroundPanel />,
     },
   ];
 
