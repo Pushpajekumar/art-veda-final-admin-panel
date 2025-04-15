@@ -7,7 +7,7 @@ interface Props {
   params: Promise<{
     id: string;
   }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: { [key: string]: string };
 }
 
 const page = async ({ params }: Props) => {
