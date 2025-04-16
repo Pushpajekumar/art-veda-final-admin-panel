@@ -28,14 +28,15 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import fabric from "fabric";
+import LockControls from "./lock-controls";
 
 //all states one by one -> reason for tutorial ->
 
 function Properties() {
   const { canvas, markAsModified } = useEditorStore();
-  
+
   //active object
-    const [selectedObject, setSelectedObject] = useState<any | null>(null);
+  const [selectedObject, setSelectedObject] = useState<any | null>(null);
   const [objectType, setObjectType] = useState("");
 
   //common
@@ -75,7 +76,11 @@ function Properties() {
         setOpacity(Math.round(activeObject.opacity * 100) || 100);
         setWidth(Math.round(activeObject.width * activeObject.scaleX));
         setHeight(Math.round(activeObject.height * activeObject.scaleY));
-        setBorderColor(typeof activeObject.stroke === 'string' ? activeObject.stroke : "#000000");
+        setBorderColor(
+          typeof activeObject.stroke === "string"
+            ? activeObject.stroke
+            : "#000000"
+        );
         setBorderWidth(activeObject.strokeWidth || 0);
 
         //check based on type
@@ -88,7 +93,11 @@ function Properties() {
           setFontWeight(activeObject.fontWeight || "normal");
           setFontStyle(activeObject.fontStyle || "normal");
           setUnderline(activeObject.underline || false);
-          setTextColor(typeof activeObject.fill === 'string' ? activeObject.fill : "#000000");
+          setTextColor(
+            typeof activeObject.fill === "string"
+              ? activeObject.fill
+              : "#000000"
+          );
           setTextBackgroundColor(activeObject.backgroundColor || "");
           setLetterSpacing(activeObject.charSpacing || 0);
         } else if (activeObject.type === "image") {
@@ -182,13 +191,13 @@ function Properties() {
       canvas.off("object:modified", handleSelectionCreated);
       canvas.off("selection:cleared", handleSelectionCleared);
     };
-  const updateObjectProperty = (property: string, value: any) => {
-    if (!canvas || !selectedObject) return;
+    const updateObjectProperty = (property: string, value: any) => {
+      if (!canvas || !selectedObject) return;
 
-    selectedObject.set(property, value);
-    canvas.renderAll();
-    markAsModified();
-  };
+      selectedObject.set(property, value);
+      canvas.renderAll();
+      markAsModified();
+    };
     markAsModified();
   }, [canvas, markAsModified]);
 
@@ -278,13 +287,17 @@ function Properties() {
     updateObjectProperty("underline", newUnderline);
   };
 
-  const handleToggleTextColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleToggleTextColorChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newTextColor = e.target.value;
     setTextColor(newTextColor);
     updateObjectProperty("fill", newTextColor);
   };
 
-  const handleToggleTextBackgroundColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleToggleTextBackgroundColorChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newTextBgColor = e.target.value;
     setTextBackgroundColor(newTextBgColor);
     updateObjectProperty("backgroundColor", newTextBgColor);
@@ -296,13 +309,17 @@ function Properties() {
     updateObjectProperty("charSpacing", newSpacing);
   };
 
-  const handleFillColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFillColorChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newFillColor = event.target.value;
     setFillColor(newFillColor);
     updateObjectProperty("fill", newFillColor);
   };
 
-  const handleBorderColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBorderColorChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newBorderColor = event.target.value;
     setBorderColor(newBorderColor);
     updateObjectProperty("stroke", newBorderColor);
@@ -855,6 +872,11 @@ function Properties() {
             </div>
           </div>
         )}
+
+        {/* Lock Controls */}
+        <div className="border-t pt-4 mt-4">
+          <LockControls />
+        </div>
       </div>
     </div>
   );

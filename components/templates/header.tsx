@@ -74,7 +74,22 @@ function Header() {
 
         console.log(imageUrl);
 
-        const canvasData = canvas.toObject(["id", "filters"]);
+        // Include additional lock properties in canvas serialization
+        const canvasData = canvas.toObject([
+          "id",
+          "filters",
+          "locked",
+          "lockProperties",
+        ]);
+
+        // Ensure all objects have their lock states preserved
+        canvasData.objects = canvasData.objects.map((obj) => {
+          // Keep existing lock properties if present
+          if (obj.locked !== undefined) {
+            return obj;
+          }
+          return obj;
+        });
 
         if (imageUrl) {
           await database.updateDocument(

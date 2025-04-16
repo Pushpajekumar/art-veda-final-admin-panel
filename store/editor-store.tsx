@@ -26,8 +26,7 @@ interface EditorState {
   setUserDesigns: (data: any[]) => void;
   userDesignsLoading: boolean;
   setUserDesignsLoading: (flag: boolean) => void;
-  showPremiumModal: boolean;
-  setShowPremiumModal: (flag: boolean) => void;
+
   showDesignsModal: boolean;
   setShowDesignsModal: (flag: boolean) => void;
   resetStore: () => void;
@@ -78,9 +77,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   userDesignsLoading: false,
   setUserDesignsLoading: (flag) => set({ userDesignsLoading: flag }),
-
-  showPremiumModal: false,
-  setShowPremiumModal: (flag) => set({ showPremiumModal: flag }),
 
   showDesignsModal: false,
   setShowDesignsModal: (flag) => set({ showDesignsModal: flag }),

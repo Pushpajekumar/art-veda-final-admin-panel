@@ -1,4 +1,5 @@
-import { Canvas, FabricImage, IText, FabricObject } from "fabric";
+import { Canvas, FabricImage, IText, FabricObject, FabricObject as FabricObjectBase } from "fabric";
+import fabric from "fabric";
 
 interface TextOptions {
   left?: number;
@@ -191,3 +192,57 @@ export const customizeBoundingBox = (canvas: Canvas | null): void => {
     console.error("Failed to customize bounding box", e);
   }
 };
+
+export function registerLockProperties() {
+  FabricObjectBase.prototype.toObject = (function (toObject) {
+    return function(this: FabricObjectBase, propertiesToInclude?: string[]) {
+      // Add locked and lockProperties to the list of properties to serialize
+      const additionalProperties = ["locked", "lockProperties"];
+      return toObject.call(
+        this,
+        propertiesToInclude
+          ? propertiesToInclude.concat(additionalProperties)
+          : additionalProperties
+      );
+    };
+  })(FabricObjectBase.prototype.toObject);
+}
+// Modified function to show clear visual indicator for locked objects
+export function addLockIndicator(canvas: Canvas) {
+  // Create lock icon overlay for locked objects
+  canvas.on("after:render", () => {
+    canvas.forEachObject((obj) => {
+      // Use type assertion since 'locked' is a custom property
+      if (obj.get('locked' as keyof typeof obj)) {
+        const bounds = obj.getBoundingRect();
+        const ctx = canvas.getContext();
+
+        ctx.save();
+
+        // Draw a small lock icon in the corner of the object
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 1;
+
+        const size = 16;
+        const x = bounds.left + bounds.width - size - 2;
+        const y = bounds.top + 2;
+
+        // Lock body
+        ctx.beginPath();
+        ctx.roundRect(x, y, size, size, 3);
+        ctx.fill();
+        ctx.stroke();
+
+        // Lock symbol (simplified)
+        ctx.strokeStyle = "white";
+        ctx.beginPath();
+        ctx.moveTo(x + size / 2, y + size / 3);
+        ctx.lineTo(x + size / 2, y + size / 1.5);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    });
+  });
+}
