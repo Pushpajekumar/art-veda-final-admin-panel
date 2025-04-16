@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/table";
 import { database } from "@/appwrite";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+
 const page = async () => {
   const categories = await database.listDocuments(
     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
