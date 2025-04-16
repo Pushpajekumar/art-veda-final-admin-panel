@@ -27,15 +27,15 @@ import {
   Underline,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import fabric from "fabric";
+import { Switch } from "@/components/ui/switch";
 
 //all states one by one -> reason for tutorial ->
 
 function Properties() {
   const { canvas, markAsModified } = useEditorStore();
-  
+
   //active object
-    const [selectedObject, setSelectedObject] = useState<any | null>(null);
+  const [selectedObject, setSelectedObject] = useState<any | null>(null);
   const [objectType, setObjectType] = useState("");
 
   //common
@@ -75,7 +75,11 @@ function Properties() {
         setOpacity(Math.round(activeObject.opacity * 100) || 100);
         setWidth(Math.round(activeObject.width * activeObject.scaleX));
         setHeight(Math.round(activeObject.height * activeObject.scaleY));
-        setBorderColor(typeof activeObject.stroke === 'string' ? activeObject.stroke : "#000000");
+        setBorderColor(
+          typeof activeObject.stroke === "string"
+            ? activeObject.stroke
+            : "#000000"
+        );
         setBorderWidth(activeObject.strokeWidth || 0);
 
         //check based on type
@@ -88,7 +92,11 @@ function Properties() {
           setFontWeight(activeObject.fontWeight || "normal");
           setFontStyle(activeObject.fontStyle || "normal");
           setUnderline(activeObject.underline || false);
-          setTextColor(typeof activeObject.fill === 'string' ? activeObject.fill : "#000000");
+          setTextColor(
+            typeof activeObject.fill === "string"
+              ? activeObject.fill
+              : "#000000"
+          );
           setTextBackgroundColor(activeObject.backgroundColor || "");
           setLetterSpacing(activeObject.charSpacing || 0);
         } else if (activeObject.type === "image") {
@@ -182,13 +190,13 @@ function Properties() {
       canvas.off("object:modified", handleSelectionCreated);
       canvas.off("selection:cleared", handleSelectionCleared);
     };
-  const updateObjectProperty = (property: string, value: any) => {
-    if (!canvas || !selectedObject) return;
+    const updateObjectProperty = (property: string, value: any) => {
+      if (!canvas || !selectedObject) return;
 
-    selectedObject.set(property, value);
-    canvas.renderAll();
-    markAsModified();
-  };
+      selectedObject.set(property, value);
+      canvas.renderAll();
+      markAsModified();
+    };
     markAsModified();
   }, [canvas, markAsModified]);
 
@@ -278,13 +286,17 @@ function Properties() {
     updateObjectProperty("underline", newUnderline);
   };
 
-  const handleToggleTextColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleToggleTextColorChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newTextColor = e.target.value;
     setTextColor(newTextColor);
     updateObjectProperty("fill", newTextColor);
   };
 
-  const handleToggleTextBackgroundColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleToggleTextBackgroundColorChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newTextBgColor = e.target.value;
     setTextBackgroundColor(newTextBgColor);
     updateObjectProperty("backgroundColor", newTextBgColor);
@@ -296,13 +308,17 @@ function Properties() {
     updateObjectProperty("charSpacing", newSpacing);
   };
 
-  const handleFillColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFillColorChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newFillColor = event.target.value;
     setFillColor(newFillColor);
     updateObjectProperty("fill", newFillColor);
   };
 
-  const handleBorderColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBorderColorChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const newBorderColor = event.target.value;
     setBorderColor(newBorderColor);
     updateObjectProperty("stroke", newBorderColor);
@@ -630,81 +646,90 @@ function Properties() {
                 onValueChange={(value) => handleLetterSpacingChange(value)}
               />
             </div>
-          </div>
-        )}
 
-        {objectType === "shape" && (
-          <div className="space-y-4 p-4 border-t">
-            <h3 className="text-sm font-medium">Shape Properties</h3>
-            <div className="flex justify-between">
-              <div className="space-y-2">
-                <Label htmlFor="fill-color" className="text-xs">
-                  Fill Color
+            <div className="space-y-4 pt-4 border-t">
+              <h3 className="text-sm font-medium">Movement Constraints</h3>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="lock-move-x" className="text-xs cursor-pointer">
+                  Lock X-axis movement
                 </Label>
-                <div className="relative w-8 h-8 overflow-hidden rounded-md border">
-                  <div
-                    className="absolute inset-0"
-                    style={{ backgroundColor: fillColor }}
-                  />
-                  <Input
-                    id="fill-color"
-                    type="color"
-                    value={fillColor}
-                    onChange={handleFillColorChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                </div>
+                <Switch
+                  id="lock-move-x-switch"
+                  checked={selectedObject?.lockMovementX || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockMovementX", checked)
+                  }
+                />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="border-color" className="text-xs">
-                  Border Color
+              <div className="flex items-center justify-between">
+                <Label htmlFor="lock-move-y" className="text-xs cursor-pointer">
+                  Lock Y-axis movement
                 </Label>
-                <div className="relative w-8 h-8 overflow-hidden rounded-md border">
-                  <div
-                    className="absolute inset-0"
-                    style={{ backgroundColor: borderColor }}
-                  />
-                  <Input
-                    id="fill-color"
-                    type="color"
-                    value={borderColor}
-                    onChange={handleBorderColorChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                </div>
+                <Switch
+                  id="lock-move-y-switch"
+                  checked={selectedObject?.lockMovementY || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockMovementY", checked)
+                  }
+                />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="border-width" className={"text-xs"}>
-                Border Width
-              </Label>
-              <span className={"text-xs mb-2"}>{borderWidth}%</span>
-              <Slider
-                id="border-width"
-                min={0}
-                max={20}
-                step={1}
-                value={[borderWidth]}
-                onValueChange={(value) => handleBorderWidthChange(value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="border-style" className={"text-xs"}>
-                Border Style
-              </Label>
-              <Select
-                value={borderStyle}
-                onValueChange={handleBorderStyleChange}
-              >
-                <SelectTrigger id="border-style" className={"h-10"}>
-                  <SelectValue placeholder="Select Border Style" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="solid">Solid</SelectItem>
-                  <SelectItem value="dashed">Dashed</SelectItem>
-                  <SelectItem value="dotted">Dotted</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor="lock-rotation"
+                  className="text-xs cursor-pointer"
+                >
+                  Lock Rotation
+                </Label>
+                <Switch
+                  id="lock-rotation-switch"
+                  checked={selectedObject?.lockRotation || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockRotation", checked)
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor="lock-scaling-x"
+                  className="text-xs cursor-pointer"
+                >
+                  Lock Scaling X axis
+                </Label>
+                <Switch
+                  id="lock-scaling-x-switch"
+                  checked={selectedObject?.lockScalingX || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockScalingX", checked)
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor=" lock-scaling-y"
+                  className="text-xs cursor-pointer"
+                >
+                  Lock Scaling Y axis
+                </Label>
+                <Switch
+                  id="lock-scaling-y-switch"
+                  checked={selectedObject?.lockScalingY || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockScalingY", checked)
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="selectable" className="text-xs cursor-pointer">
+                  Selectable
+                </Label>
+                <Switch
+                  id="selectable-switch"
+                  checked={selectedObject?.selectable || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("selectable", checked)
+                  }
+                />
+              </div>
             </div>
           </div>
         )}
@@ -797,61 +822,90 @@ function Properties() {
                 />
               </div>
             )}
-          </div>
-        )}
 
-        {objectType === "path" && (
-          <div className="space-y-4 p-4 border-t">
-            <h3 className="text-sm font-medium">Path Properties</h3>
-            <div className="space-y-2">
-              <Label htmlFor="border-color" className="text-xs">
-                Border Color
-              </Label>
-              <div className="relative w-8 h-8 overflow-hidden rounded-md border">
-                <div
-                  className="absolute inset-0"
-                  style={{ backgroundColor: borderColor }}
-                />
-                <Input
-                  id="fill-color"
-                  type="color"
-                  value={borderColor}
-                  onChange={handleBorderColorChange}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+            <div className="space-y-4 pt-4 border-t">
+              <h3 className="text-sm font-medium">Movement Constraints</h3>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="lock-move-x" className="text-xs cursor-pointer">
+                  Lock X-axis movement
+                </Label>
+                <Switch
+                  id="lock-move-x-switch"
+                  checked={selectedObject?.lockMovementX || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockMovementX", checked)
+                  }
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="border-width" className={"text-xs"}>
-                Border Width
-              </Label>
-              <span className={"text-xs mb-2"}>{borderWidth}%</span>
-              <Slider
-                id="border-width"
-                min={0}
-                max={20}
-                step={1}
-                value={[borderWidth]}
-                onValueChange={(value) => handleBorderWidthChange(value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="border-style" className={"text-xs"}>
-                Border Style
-              </Label>
-              <Select
-                value={borderStyle}
-                onValueChange={handleBorderStyleChange}
-              >
-                <SelectTrigger id="border-style" className={"h-10"}>
-                  <SelectValue placeholder="Select Border Style" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="solid">Solid</SelectItem>
-                  <SelectItem value="dashed">Dashed</SelectItem>
-                  <SelectItem value="dotted">Dotted</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="lock-move-y" className="text-xs cursor-pointer">
+                  Lock Y-axis movement
+                </Label>
+                <Switch
+                  id="lock-move-y-switch"
+                  checked={selectedObject?.lockMovementY || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockMovementY", checked)
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor="lock-rotation"
+                  className="text-xs cursor-pointer"
+                >
+                  Lock Rotation
+                </Label>
+                <Switch
+                  id="lock-rotation-switch"
+                  checked={selectedObject?.lockRotation || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockRotation", checked)
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor="lock-scaling-x"
+                  className="text-xs cursor-pointer"
+                >
+                  Lock Scaling X axis
+                </Label>
+                <Switch
+                  id="lock-scaling-x-switch"
+                  checked={selectedObject?.lockScalingX || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockScalingX", checked)
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label
+                  htmlFor=" lock-scaling-y"
+                  className="text-xs cursor-pointer"
+                >
+                  Lock Scaling Y axis
+                </Label>
+                <Switch
+                  id="lock-scaling-y-switch"
+                  checked={selectedObject?.lockScalingY || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("lockScalingY", checked)
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="selectable" className="text-xs cursor-pointer">
+                  Selectable
+                </Label>
+                <Switch
+                  id="selectable-switch"
+                  checked={selectedObject?.selectable || false}
+                  onCheckedChange={(checked) =>
+                    updateObjectProperty("selectable", checked)
+                  }
+                />
+              </div>
             </div>
           </div>
         )}

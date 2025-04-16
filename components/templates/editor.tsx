@@ -84,53 +84,63 @@ const Editor = ({
 
         try {
           if (design) {
-        canvas.clear();
-        // Set dimensions at half size
-        const scaledWidth = canvasWidth * 0.5;
-        const scaledHeight = canvasHeight * 0.5;
-        
-        if (canvasWidth && canvasHeight) {
-          canvas.setDimensions({
-            width: scaledWidth,
-            height: scaledHeight,
-          });
+            canvas.clear();
+            // Set dimensions at half size
+            const scaledWidth = canvasWidth * 0.5;
+            const scaledHeight = canvasHeight * 0.5;
 
-          console.log("Canvas dimensions set at half size");
-        }
+            if (canvasWidth && canvasHeight) {
+              canvas.setDimensions({
+                width: scaledWidth,
+                height: scaledHeight,
+              });
 
-        const canvasData =
-          typeof design === "string" ? JSON.parse(design) : design;
+              console.log("Canvas dimensions set at half size");
+            }
 
-        const hasObjects =
-          canvasData.objects && canvasData.objects.length > 0;
+            const canvasData =
+              typeof design === "string" ? JSON.parse(design) : design;
 
-        if (canvasData.background) {
-          canvas.backgroundColor = canvasData.background;
-        } else {
-          canvas.backgroundColor = "#ffffff";
-        }
+            const hasObjects =
+              canvasData.objects && canvasData.objects.length > 0;
 
-        if (!hasObjects) {
-          canvas.renderAll();
-          return true;
-        }
+            if (canvasData.background) {
+              canvas.backgroundColor = canvasData.background;
+            } else {
+              canvas.backgroundColor = "#ffffff";
+            }
 
-        // Load the JSON and scale all objects to 0.5x
-        canvas.loadFromJSON(design, () => {
-          // Scale down all objects
-          canvas.getObjects().forEach((obj) => {
-            obj.scale(0.5);
-            obj.setCoords();
-          });
-          canvas.requestRenderAll();
-        });
+            if (!hasObjects) {
+              canvas.renderAll();
+              return true;
+            }
+
+            // Load the JSON and scale all objects to 0.5x
+            canvas.loadFromJSON(design, () => {
+              // Scale down all objects and restore lock states
+              canvas.getObjects().forEach((obj) => {
+                obj.scale(0.5);
+                obj.setCoords();
+
+                // Ensure lock properties are correctly applied after loading
+                // Note: the properties should already be loaded from JSON but this ensures they're applied
+                if (obj.lockMovementX) obj.lockMovementX = true;
+                if (obj.lockMovementY) obj.lockMovementY = true;
+                if (obj.lockRotation) obj.lockRotation = true;
+                if (obj.lockScalingX) obj.lockScalingX = true;
+                if (obj.lockScalingY) obj.lockScalingY = true;
+                if (obj.hasOwnProperty("selectable"))
+                  obj.selectable = obj.selectable;
+              });
+              canvas.requestRenderAll();
+            });
           } else {
-        console.log("no canvas data");
-        canvas.clear();
-        canvas.setWidth(canvasWidth * 0.5);
-        canvas.setHeight(canvasHeight * 0.5);
-        canvas.backgroundColor = "#ffffff";
-        canvas.renderAll();
+            console.log("no canvas data");
+            canvas.clear();
+            canvas.setWidth(canvasWidth * 0.5);
+            canvas.setHeight(canvasHeight * 0.5);
+            canvas.backgroundColor = "#ffffff";
+            canvas.renderAll();
           }
         } catch (e) {
           console.error("Error loading canvas", e);

@@ -74,7 +74,23 @@ function Header() {
 
         console.log(imageUrl);
 
-        const canvasData = canvas.toObject(["id", "filters"]);
+        // Include lock properties in serialization
+        const propertiesToInclude = [
+          "id",
+          "filters",
+          "lockMovementX",
+          "lockMovementY",
+          "lockRotation",
+          "lockScalingX",
+          "lockScalingY",
+          "selectable",
+          "hasControls",
+          "locked",
+        ];
+
+        const canvasData = canvas.toObject(propertiesToInclude);
+
+        console.log(canvasData, "canvasData");
 
         if (imageUrl) {
           await database.updateDocument(

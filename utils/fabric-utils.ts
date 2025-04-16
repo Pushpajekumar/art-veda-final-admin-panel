@@ -1,4 +1,4 @@
-import { Canvas, FabricImage, IText, FabricObject } from "fabric";
+import { Canvas, FabricImage, IText, FabricObject, Object as FabricObjectClass } from "fabric";
 
 interface TextOptions {
   left?: number;
@@ -191,3 +191,27 @@ export const customizeBoundingBox = (canvas: Canvas | null): void => {
     console.error("Failed to customize bounding box", e);
   }
 };
+
+/**
+ * Registers custom properties with Fabric.js for serialization
+ */
+export function registerCustomProperties() {
+  // Add properties to be included in serialization by default
+  const additionalProps = [
+    "lockMovementX",
+    "lockMovementY",
+    "lockRotation",
+    "lockScalingX",
+    "lockScalingY",
+    "selectable",
+    "hasControls",
+    "locked",
+  ];
+
+  // Override toObject method to include our custom properties
+  FabricObjectClass.prototype.toObject = (function (toObject) {
+    return function(this: FabricObject, propertiesToInclude = []) {
+      return toObject.call(this, propertiesToInclude.concat(additionalProps));
+    };
+  })(FabricObjectClass.prototype.toObject);
+}

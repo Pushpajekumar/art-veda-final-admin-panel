@@ -1,6 +1,10 @@
 "use client";
 
-import { customizeBoundingBox, initializeFabric } from "@/utils/fabric-utils";
+import {
+  customizeBoundingBox,
+  initializeFabric,
+  registerCustomProperties,
+} from "@/utils/fabric-utils";
 import { useEditorStore } from "@/store/editor-store";
 import { useEffect, useRef } from "react";
 import fabric from "fabric";
@@ -44,7 +48,7 @@ const Canvas = () => {
     //init our canvas
     const initcanvas = async () => {
       if (
-        typeof window === undefined ||
+        typeof window === "undefined" ||
         !canvasRef.current ||
         initAttemptedRef.current
       ) {
@@ -54,6 +58,9 @@ const Canvas = () => {
       initAttemptedRef.current = true;
 
       try {
+        // Register custom properties for serialization before initializing canvas
+        registerCustomProperties();
+
         const fabricCanvas = await initializeFabric(
           canvasRef.current!,
           canvasContainerRef.current!
