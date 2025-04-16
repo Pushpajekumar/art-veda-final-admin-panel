@@ -13,6 +13,9 @@ import { database, Query } from "@/appwrite";
 import CreateSubCategory from "@/components/subcategories/create-subcategorie";
 // import { Models } from "appwrite";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const page = async () => {
   const [subCategories, categories] = await Promise.all([
     database.listDocuments(
