@@ -16,7 +16,7 @@ import { database, ID, storage } from "@/appwrite";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
-function Header() {
+function Header({ isFrame = false }) {
   const {
     isEditing,
     setIsEditing,
@@ -93,9 +93,15 @@ function Header() {
         console.log(canvasData, "canvasData");
 
         if (imageUrl) {
+          // Determine which collection to save to based on whether this is a frame or template
+          const collectionId = isFrame
+            ? (process.env.NEXT_PUBLIC_APPWRITE_FRAMES_COLLECTION_ID as string)
+            : (process.env
+                .NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID as string);
+
           await database.updateDocument(
             process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-            process.env.NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID as string,
+            collectionId,
             designId!,
             {
               template: JSON.stringify(canvasData),
@@ -108,10 +114,10 @@ function Header() {
       }
     } catch (error) {
       console.error("Error saving design", error);
-      toast.error("Failed to save design");
+      toast.error(`Failed to save ${isFrame ? "frame" : "design"}`);
     } finally {
       setIsLoading(false);
-      toast.success("Design saved successfully");
+      toast.success(`${isFrame ? "Frame" : "Design"} saved successfully`);
     }
   };
 
@@ -141,6 +147,7 @@ function Header() {
             className="w-full bg-white text-neutral-900 border border-neutral-300 focus:ring-0 focus:border-neutral-500"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            placeholder={isFrame ? "Frame Name" : "Design Name"}
           />
         </div>
         <div>
@@ -162,6 +169,7 @@ function Header() {
       <ExportModal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
+        isFrame={isFrame}
       />
     </header>
   );

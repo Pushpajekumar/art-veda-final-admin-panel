@@ -1,15 +1,12 @@
 "use client";
 import { useState } from "react";
 import {
+  Frame,
   BookTemplate,
-  Calendar,
-  Home,
-  Inbox,
-  LogOut,
-  Search,
-  Settings,
   Users,
+  Inbox,
   UsersRound,
+  LogOut,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,6 +31,11 @@ const items = [
     title: "Templates",
     url: "/admin/templates",
     icon: BookTemplate,
+  },
+  {
+    title: "Frames",
+    url: "/admin/frames",
+    icon: Frame,
   },
   {
     title: "Users",

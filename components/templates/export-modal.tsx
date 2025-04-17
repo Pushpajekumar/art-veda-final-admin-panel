@@ -8,6 +8,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
@@ -30,9 +31,14 @@ import { useState } from "react";
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
+  isFrame?: boolean;
 }
 
-function ExportModal({ isOpen, onClose }: ExportModalProps) {
+const ExportModal: React.FC<ExportModalProps> = ({
+  isOpen,
+  onClose,
+  isFrame = false,
+}) => {
   const { canvas } = useEditorStore();
 
   const [selectedFormat, setSelectedFormat] = useState("png");
@@ -111,11 +117,16 @@ function ExportModal({ isOpen, onClose }: ExportModalProps) {
 
   if (!isOpen) return null;
 
+  const title = isFrame ? "Export Frame" : "Export Design";
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className={"sm:max-w-md"}>
         <DialogHeader>
-          <DialogTitle className={"text-xl"}>Export Design</DialogTitle>
+          <DialogTitle className={"text-xl"}>{title}</DialogTitle>
+          <DialogDescription>
+            Choose your export format and settings
+          </DialogDescription>
         </DialogHeader>
 
         <div className="py-4">
@@ -175,6 +186,6 @@ function ExportModal({ isOpen, onClose }: ExportModalProps) {
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export default ExportModal;

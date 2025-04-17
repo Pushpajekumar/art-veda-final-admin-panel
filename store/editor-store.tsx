@@ -21,7 +21,8 @@ interface EditorState {
   lastModified: number;
   isModified: boolean;
   markAsModified: () => void;
-
+  isFrame: boolean;
+  setIsFrame: (flag: boolean) => void;
   userDesigns: any[];
   setUserDesigns: (data: any[]) => void;
   userDesignsLoading: boolean;
@@ -58,6 +59,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setSaveStatus: (status: string) => set({ saveStatus: status }),
   lastModified: Date.now(),
   isModified: false,
+  isFrame: false,
+  setIsFrame: (flag: boolean) => set({ isFrame: flag }),
 
   markAsModified: () => {
     const designId = get().designId;
@@ -95,6 +98,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       saveStatus: "Saved",
       isModified: false,
       lastModified: Date.now(),
+      isFrame: false,
     });
   },
 }));

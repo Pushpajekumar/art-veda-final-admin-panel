@@ -11,6 +11,7 @@ interface EditorProops {
   designId: string | null;
   canvasWidth: number;
   canvasHeight: number;
+  isFrame?: boolean;
 }
 
 const Editor = ({
@@ -18,6 +19,7 @@ const Editor = ({
   designId,
   canvasWidth,
   canvasHeight,
+  isFrame = false,
 }: EditorProops) => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -31,6 +33,7 @@ const Editor = ({
     setShowProperties,
     showProperties,
     isEditing,
+    setIsFrame,
   } = useEditorStore();
 
   React.useEffect(() => {
@@ -41,6 +44,9 @@ const Editor = ({
     if (designId) {
       setDesignId(designId);
     }
+
+    // Set if this is a frame
+    setIsFrame(isFrame);
 
     return () => {
       //cleanup the store
