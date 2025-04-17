@@ -3,8 +3,28 @@ import { database } from "@/appwrite";
 import Image from "next/image";
 import React, { use, useEffect } from "react";
 
+interface Frame {
+  $id: string;
+  $collectionId: string;
+  $databaseId: string;
+  $createdAt: string;
+  $updatedAt: string;
+  $permissions: string[];
+  name: string;
+  previewImage: string;
+  previewImageID: string;
+  template: string;
+  width: number;
+  height: number;
+}
+
+interface FramesResponse {
+  documents: Frame[];
+  total: number;
+}
+
 const Frames = () => {
-  const [frames, setFrames] = React.useState<any>([]);
+  const [frames, setFrames] = React.useState<FramesResponse>({ documents: [], total: 0 });
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -15,7 +35,8 @@ const Frames = () => {
           process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
           process.env.NEXT_PUBLIC_APPWRITE_FRAMES_COLLECTION_ID!
         );
-        setFrames(response);
+        setFrames(response as unknown as FramesResponse);
+        console.log(response);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching frames:", err);
