@@ -7,6 +7,7 @@ import {
   Inbox,
   UsersRound,
   LogOut,
+  Calendar,
 } from "lucide-react";
 import {
   Sidebar,
@@ -51,6 +52,11 @@ const items = [
     title: "Subcategories",
     url: "/admin/sub-categories",
     icon: UsersRound,
+  },
+  {
+    title: "Calendar",
+    url: "/admin/calendar",
+    icon: Calendar,
   },
 ];
 
