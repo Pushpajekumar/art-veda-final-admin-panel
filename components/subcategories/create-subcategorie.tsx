@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "../ui/switch";
 
 const formSchema = z.object({
   subCategoryName: z.string().min(1, {
@@ -39,6 +40,8 @@ const formSchema = z.object({
   category: z.string().min(1, {
     message: "Category is required",
   }),
+  on_homeScreen: z.boolean(),
+  numbering: z.number().optional(),
 });
 
 interface Category {
@@ -58,6 +61,8 @@ const CreateSubCategory = ({ categories }: CreateSubCategoryProps) => {
     defaultValues: {
       subCategoryName: "",
       category: "",
+      on_homeScreen: false,
+      numbering: 0,
     },
   });
 
@@ -71,13 +76,15 @@ const CreateSubCategory = ({ categories }: CreateSubCategoryProps) => {
         {
           name: values.subCategoryName,
           category: values.category,
+          isOnHomescreen: values.on_homeScreen,
+          numbering: values.numbering || 1,
         }
       );
-      toast.success("Category created successfully!");
+      toast.success("Subcategory created successfully!");
       form.reset();
     } catch (error) {
-      console.error("Error creating category:", error);
-      toast.error("Error creating category");
+      console.error("Error creating subcategory:", error);
+      toast.error("Error creating subcategory");
     } finally {
       setIsLoading(false);
     }
@@ -136,6 +143,53 @@ const CreateSubCategory = ({ categories }: CreateSubCategoryProps) => {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="on_homeScreen"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel>On Home Screen</FormLabel>
+                      <FormDescription>
+                        Show this category on the home screen.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="numbering"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Numbering</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter numbering"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? parseInt(e.target.value) : 0
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      This is the numbering for the category.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

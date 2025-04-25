@@ -91,7 +91,10 @@ const CreateCategory = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" isLoading={isLoading}>Create</Button>
+
+              <Button type="submit" isLoading={isLoading}>
+                Create
+              </Button>
             </form>
           </Form>
         </div>
