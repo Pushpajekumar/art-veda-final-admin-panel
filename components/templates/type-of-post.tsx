@@ -18,40 +18,10 @@ import { useRouter } from "next/navigation";
 
 const postTypes = [
   {
-    name: "Facebook",
-    icon: Facebook,
-    width: 1200,
-    height: 630,
-  },
-  {
-    name: "Twitter",
-    icon: Twitter,
-    width: 1200,
-    height: 675,
-  },
-  {
     name: "Instagram",
     icon: Instagram,
     width: 1080,
     height: 1080,
-  },
-  {
-    name: "LinkedIn",
-    icon: Linkedin,
-    width: 1200,
-    height: 627,
-  },
-  {
-    name: "YouTube",
-    icon: Youtube,
-    width: 1280,
-    height: 720,
-  },
-  {
-    name: "Snapchat",
-    icon: Camera, // Using Camera as placeholder since Lucide doesn't have a Snapchat icon
-    width: 1080,
-    height: 1920,
   },
 ];
 
@@ -98,7 +68,7 @@ const TypeOfPost: React.FC<TypeOfPostProps> = ({ onSelectPostType }) => {
         console.log(template);
         toast.success("Custom banner created successfully");
         router.push(
-          `/admin/templates/${template.$id}?width=${width}&height=${height}`
+          `/admin/posts/${template.$id}?width=${width}&height=${height}`
         );
       }
     } catch (error) {
