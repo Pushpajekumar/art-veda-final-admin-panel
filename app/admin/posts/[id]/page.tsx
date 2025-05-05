@@ -19,8 +19,6 @@ const page = async ({ params }: Props) => {
     id
   );
 
-  console.log(templates);
-
   return (
     <div>
       <div>

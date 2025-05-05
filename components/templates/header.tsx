@@ -15,6 +15,16 @@ import ExportModal from "./export-modal";
 import { database, ID, storage } from "@/appwrite";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Label } from "../ui/label";
 
 function Header({ isFrame = false }) {
   const {
@@ -28,6 +38,8 @@ function Header({ isFrame = false }) {
   } = useEditorStore();
   const [showExportModal, setShowExportModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [subCategories, setSubCategories] = useState<any[]>([]);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
 
   useEffect(() => {
     if (!canvas) return;
@@ -42,6 +54,26 @@ function Header({ isFrame = false }) {
     if (!canvas || !designId) return;
     markAsModified();
   }, [name, canvas, designId]);
+
+  useEffect(() => {
+    console.log("Effect triggered");
+    const fetchSubCategories = async () => {
+      try {
+        const subCategories = await database.listDocuments(
+          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+          process.env.NEXT_PUBLIC_APPWRITE_SUB_CATEGORY_COLLECTION_ID as string
+        );
+
+        setSubCategories(subCategories.documents);
+        // Use subCategories data if needed
+        console.log(subCategories, "Subcategories 🟢");
+      } catch (error) {
+        console.error("Error fetching subcategories:", error);
+      }
+    };
+
+    fetchSubCategories();
+  }, []);
 
   const handleExport = () => {
     setShowExportModal(true);
@@ -98,16 +130,26 @@ function Header({ isFrame = false }) {
             ? (process.env.NEXT_PUBLIC_APPWRITE_FRAMES_COLLECTION_ID as string)
             : (process.env.NEXT_PUBLIC_APPWRITE_POSTS_COLLECTION_ID as string);
 
+          // Prepare update data
+          const updateData: any = {
+            template: JSON.stringify(canvasData),
+            previewImageID: uploadedImage.$id,
+            previewImage: imageUrl,
+            name,
+          };
+
+          console.log(selectedSubCategory, "Selected Subcategory");
+
+          // Only include subcategoryId if it's selected
+          if (selectedSubCategory) {
+            updateData.subCategory = selectedSubCategory;
+          }
+
           await database.updateDocument(
             process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
             collectionId,
             designId!,
-            {
-              template: JSON.stringify(canvasData),
-              previewImageID: uploadedImage.$id,
-              previewImage: imageUrl,
-              name,
-            }
+            updateData
           );
         }
       }
@@ -119,6 +161,8 @@ function Header({ isFrame = false }) {
       toast.success(`${isFrame ? "Frame" : "Design"} saved successfully`);
     }
   };
+
+  console.log(subCategories, "Subcategories 🟡");
 
   return (
     <header className="header-gradient  header flex items-center justify-between px-4 h-14">
@@ -141,13 +185,33 @@ function Header({ isFrame = false }) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <div className="flex-1 flex justify-center max-w-md">
+        <div className="flex-1 flex justify-center max-w-md space-x-3">
           <Input
             className="w-full bg-white text-neutral-900 border border-neutral-300 focus:ring-0 focus:border-neutral-500"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={isFrame ? "Frame Name" : "Design Name"}
           />
+
+          {/* Add subcategory selector */}
+          <Select
+            value={selectedSubCategory}
+            onValueChange={setSelectedSubCategory}
+          >
+            <SelectTrigger className="w-[180px] bg-white text-black">
+              <SelectValue placeholder="Select Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Categories</SelectLabel>
+                {subCategories.map((category) => (
+                  <SelectItem key={category.$id} value={category.$id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Button isLoading={isLoading} onClick={handleSave}>

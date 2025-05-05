@@ -35,7 +35,7 @@ const TemplateCard = ({ image, name, createdAt, id }: TemplateCardProps) => {
             Created: {new Date(createdAt).toLocaleDateString()}
           </p>
 
-          <Link href={`/admin/templates/${id}`}>
+          <Link href={`/admin/posts/${id}`}>
             <Button className="mt-1">
               View Details <MoveRight />
             </Button>
