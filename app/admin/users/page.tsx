@@ -13,7 +13,7 @@ export type User = {
 
 const page = async () => {
   const users = await database.listDocuments(
-   '6815de2b0004b53475ecs',
+    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
     process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID as string
   );
   console.log(users);
