@@ -200,14 +200,24 @@ const Editor = ({
       setShowProperties(false);
     };
 
+    // Ensure newly added objects get a default label
+    const handleObjectAdded = (e: any) => {
+      const obj = e.target;
+      if (obj && !obj.hasOwnProperty("label")) {
+        obj.set("label", "");
+      }
+    };
+
     canvas.on("selection:created", handleSelectionCreated);
     canvas.on("selection:updated", handleSelectionCreated);
     canvas.on("selection:cleared", handleSelectionCleared);
+    canvas.on("object:added", handleObjectAdded);
 
     return () => {
       canvas.off("selection:created", handleSelectionCreated);
       canvas.off("selection:updated", handleSelectionCreated);
       canvas.off("selection:cleared", handleSelectionCleared);
+      canvas.off("object:added", handleObjectAdded);
     };
   }, [canvas]);
 

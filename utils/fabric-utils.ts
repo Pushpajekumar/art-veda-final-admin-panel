@@ -1,4 +1,10 @@
-import { Canvas, FabricImage, IText, FabricObject, Object as FabricObjectClass } from "fabric";
+import {
+  Canvas,
+  FabricImage,
+  IText,
+  FabricObject,
+  Object as FabricObjectClass,
+} from "fabric";
 
 interface TextOptions {
   left?: number;
@@ -206,12 +212,21 @@ export function registerCustomProperties() {
     "selectable",
     "hasControls",
     "locked",
+    "label", // Add the label property
   ];
 
   // Override toObject method to include our custom properties
   FabricObjectClass.prototype.toObject = (function (toObject) {
-    return function(this: FabricObject, propertiesToInclude = []) {
+    return function (this: FabricObject, propertiesToInclude = []) {
       return toObject.call(this, propertiesToInclude.concat(additionalProps));
     };
   })(FabricObjectClass.prototype.toObject);
+}
+
+// Add a helper function to initialize objects with default properties
+export function initializeObjectDefaults(obj: any) {
+  if (!obj.hasOwnProperty("label")) {
+    obj.set("label", "");
+  }
+  return obj;
 }

@@ -29,21 +29,18 @@ import {
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 
-//all states one by one -> reason for tutorial ->
-
 function Properties() {
   const { canvas, markAsModified } = useEditorStore();
 
-  //active object
   const [selectedObject, setSelectedObject] = useState<any | null>(null);
   const [objectType, setObjectType] = useState("");
+  const [objectLabel, setObjectLabel] = useState<string>("");
+  const [frameTextObjects, setFrameTextObjects] = useState<any[]>([]);
 
-  //common
   const [opacity, setOpacity] = useState(100);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
 
-  //text
   const [text, setText] = useState("");
   const [fontSize, setFontSize] = useState(24);
   const [fontFamily, setFontFamily] = useState("Arial");
@@ -64,14 +61,14 @@ function Properties() {
 
   useEffect(() => {
     if (!canvas) return;
+
     const handleSelectionCreated = () => {
       const activeObject = canvas.getActiveObject() as any;
 
       if (activeObject) {
-        console.log(activeObject.type, "active object type");
-
         setSelectedObject(activeObject);
-        //update common properties
+        setObjectLabel(activeObject.label || "");
+
         setOpacity(Math.round(activeObject.opacity * 100) || 100);
         setWidth(Math.round(activeObject.width * activeObject.scaleX));
         setHeight(Math.round(activeObject.height * activeObject.scaleY));
@@ -82,7 +79,6 @@ function Properties() {
         );
         setBorderWidth(activeObject.strokeWidth || 0);
 
-        //check based on type
         if (activeObject.type === "i-text") {
           setObjectType("text");
 
@@ -146,6 +142,19 @@ function Properties() {
               setBorderStyle("solid");
             }
           }
+        } else if (activeObject.type === "group" && activeObject.isFrame) {
+          setObjectType("frame");
+
+          const textObjects = activeObject
+            .getObjects()
+            .filter(
+              (obj: any) =>
+                obj.type === "text" ||
+                obj.type === "i-text" ||
+                obj.type === "textbox"
+            );
+
+          setFrameTextObjects(textObjects);
         } else {
           setObjectType("shape");
 
@@ -172,7 +181,11 @@ function Properties() {
       }
     };
 
-    const handleSelectionCleared = () => {};
+    const handleSelectionCleared = () => {
+      setSelectedObject(null);
+      setObjectLabel("");
+      setFrameTextObjects([]);
+    };
 
     const activeObject = canvas.getActiveObject();
     if (activeObject) {
@@ -190,15 +203,7 @@ function Properties() {
       canvas.off("object:modified", handleSelectionCreated);
       canvas.off("selection:cleared", handleSelectionCleared);
     };
-    const updateObjectProperty = (property: string, value: any) => {
-      if (!canvas || !selectedObject) return;
-
-      selectedObject.set(property, value);
-      canvas.renderAll();
-      markAsModified();
-    };
-    markAsModified();
-  }, [canvas, markAsModified]);
+  }, [canvas]);
 
   const updateObjectProperty = (property: string, value: any) => {
     if (!canvas || !selectedObject) return;
@@ -208,21 +213,41 @@ function Properties() {
     markAsModified();
   };
 
-  //opacity
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setObjectLabel(newValue);
+
+    if (selectedObject) {
+      updateObjectProperty("label", newValue);
+    }
+  };
+
+  const handleFrameTextLabelChange = (index: number, newLabel: string) => {
+    if (!canvas || !frameTextObjects[index]) return;
+
+    frameTextObjects[index].set("label", newLabel);
+    canvas.renderAll();
+  };
+
+  const handleFrameTextChange = (index: number, newText: string) => {
+    if (!canvas || !frameTextObjects[index]) return;
+
+    frameTextObjects[index].set("text", newText);
+    canvas.renderAll();
+  };
+
   const handleOpacityChange = (value: number[]) => {
     const newValue = Number(value[0]);
     setOpacity(newValue);
     updateObjectProperty("opacity", newValue / 100);
   };
 
-  //delete
   const handleDelete = () => {
     if (!canvas || !selectedObject) return;
     deletedSelectedObject(canvas);
     markAsModified();
   };
 
-  //arrangements
   const handleBringToFront = () => {
     if (!canvas || !selectedObject) return;
     canvas.bringObjectToFront(selectedObject);
@@ -236,8 +261,6 @@ function Properties() {
     canvas.renderAll();
     markAsModified();
   };
-
-  //Flip H and Flip V
 
   const handleFlipHorizontal = () => {
     if (!canvas || !selectedObject) return;
@@ -420,7 +443,6 @@ function Properties() {
       </div>
       <div className="h-[calc(100%-96px)] overflow-auto p-4 space-y-6">
         <h3 className="text-sm font-medium">Size & Position</h3>
-        {/* Width & Height */}
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label className={"text-xs"}>Width</Label>
@@ -435,7 +457,6 @@ function Properties() {
             </div>
           </div>
         </div>
-        {/* Opacity */}
         <div className="space-y-2">
           <div className="flex justify-between">
             <Label htmlFor="opacity" className={"text-xs"}>
@@ -452,7 +473,6 @@ function Properties() {
             onValueChange={(value) => handleOpacityChange(value)}
           />
         </div>
-        {/* Flip H, Flip V */}
         <div className="flex flex-wrap gap-2">
           <Button
             onClick={handleFlipHorizontal}
@@ -473,8 +493,6 @@ function Properties() {
             Flip V
           </Button>
         </div>
-
-        {/* Arrangement */}
         <div className="space-y-4 pt-4 border-t">
           <h3 className="text-sm font-medium">Layer Position</h3>
           <div className="grid grid-cols-2 gap-2">
@@ -498,8 +516,6 @@ function Properties() {
             </Button>
           </div>
         </div>
-
-        {/* Duplicate and delete */}
         <div className="space-y-4 pt-4 border-t">
           <h3 className="text-sm font-medium">Duplicate and Delete</h3>
           <div className="grid grid-cols-2 gap-2">
@@ -514,8 +530,25 @@ function Properties() {
             </Button>
           </div>
         </div>
-
-        {/* Text related properties */}
+        {selectedObject && (
+          <div className="space-y-4">
+            <div className="mb-4">
+              <Label
+                htmlFor="elementLabel"
+                className="block text-sm font-medium mb-1"
+              >
+                Element Label
+              </Label>
+              <Input
+                id="elementLabel"
+                value={objectLabel}
+                onChange={handleLabelChange}
+                placeholder="Enter element label"
+                className="w-full"
+              />
+            </div>
+          </div>
+        )}
         {objectType === "text" && (
           <div className="space-y-4 border-t">
             <h3 className="text-sm font-medium">Text Properties</h3>
@@ -646,94 +679,8 @@ function Properties() {
                 onValueChange={(value) => handleLetterSpacingChange(value)}
               />
             </div>
-
-            <div className="space-y-4 pt-4 border-t">
-              <h3 className="text-sm font-medium">Movement Constraints</h3>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="lock-move-x" className="text-xs cursor-pointer">
-                  Lock X-axis movement
-                </Label>
-                <Switch
-                  id="lock-move-x-switch"
-                  checked={selectedObject?.lockMovementX || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockMovementX", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="lock-move-y" className="text-xs cursor-pointer">
-                  Lock Y-axis movement
-                </Label>
-                <Switch
-                  id="lock-move-y-switch"
-                  checked={selectedObject?.lockMovementY || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockMovementY", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label
-                  htmlFor="lock-rotation"
-                  className="text-xs cursor-pointer"
-                >
-                  Lock Rotation
-                </Label>
-                <Switch
-                  id="lock-rotation-switch"
-                  checked={selectedObject?.lockRotation || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockRotation", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label
-                  htmlFor="lock-scaling-x"
-                  className="text-xs cursor-pointer"
-                >
-                  Lock Scaling X axis
-                </Label>
-                <Switch
-                  id="lock-scaling-x-switch"
-                  checked={selectedObject?.lockScalingX || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockScalingX", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label
-                  htmlFor=" lock-scaling-y"
-                  className="text-xs cursor-pointer"
-                >
-                  Lock Scaling Y axis
-                </Label>
-                <Switch
-                  id="lock-scaling-y-switch"
-                  checked={selectedObject?.lockScalingY || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockScalingY", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="selectable" className="text-xs cursor-pointer">
-                  Selectable
-                </Label>
-                <Switch
-                  id="selectable-switch"
-                  checked={selectedObject?.selectable || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("selectable", checked)
-                  }
-                />
-              </div>
-            </div>
           </div>
         )}
-
         {objectType === "image" && (
           <div className="space-y-4 p-4 border-t">
             <h3 className="text-sm font-medium">Image Properties</h3>
@@ -822,90 +769,35 @@ function Properties() {
                 />
               </div>
             )}
-
-            <div className="space-y-4 pt-4 border-t">
-              <h3 className="text-sm font-medium">Movement Constraints</h3>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="lock-move-x" className="text-xs cursor-pointer">
-                  Lock X-axis movement
-                </Label>
-                <Switch
-                  id="lock-move-x-switch"
-                  checked={selectedObject?.lockMovementX || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockMovementX", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="lock-move-y" className="text-xs cursor-pointer">
-                  Lock Y-axis movement
-                </Label>
-                <Switch
-                  id="lock-move-y-switch"
-                  checked={selectedObject?.lockMovementY || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockMovementY", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label
-                  htmlFor="lock-rotation"
-                  className="text-xs cursor-pointer"
-                >
-                  Lock Rotation
-                </Label>
-                <Switch
-                  id="lock-rotation-switch"
-                  checked={selectedObject?.lockRotation || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockRotation", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label
-                  htmlFor="lock-scaling-x"
-                  className="text-xs cursor-pointer"
-                >
-                  Lock Scaling X axis
-                </Label>
-                <Switch
-                  id="lock-scaling-x-switch"
-                  checked={selectedObject?.lockScalingX || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockScalingX", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label
-                  htmlFor=" lock-scaling-y"
-                  className="text-xs cursor-pointer"
-                >
-                  Lock Scaling Y axis
-                </Label>
-                <Switch
-                  id="lock-scaling-y-switch"
-                  checked={selectedObject?.lockScalingY || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("lockScalingY", checked)
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="selectable" className="text-xs cursor-pointer">
-                  Selectable
-                </Label>
-                <Switch
-                  id="selectable-switch"
-                  checked={selectedObject?.selectable || false}
-                  onCheckedChange={(checked) =>
-                    updateObjectProperty("selectable", checked)
-                  }
-                />
-              </div>
+          </div>
+        )}
+        {objectType === "frame" && frameTextObjects.length > 0 && (
+          <div className="mt-4 space-y-4">
+            <div className="border-t pt-3">
+              <h4 className="text-md font-medium mb-2">
+                Text Elements in Frame
+              </h4>
+              {frameTextObjects.map((textObj, index) => (
+                <div key={index} className="mb-3 p-2 border rounded bg-gray-50">
+                  <Label className="mb-1 block">Text {index + 1}</Label>
+                  <Input
+                    value={textObj.text}
+                    onChange={(e) =>
+                      handleFrameTextChange(index, e.target.value)
+                    }
+                    className="w-full mb-2"
+                  />
+                  <Label className="mb-1 block text-sm">Element Label</Label>
+                  <Input
+                    value={textObj.label || ""}
+                    onChange={(e) =>
+                      handleFrameTextLabelChange(index, e.target.value)
+                    }
+                    className="w-full mb-2"
+                    placeholder="Enter label for this element"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         )}

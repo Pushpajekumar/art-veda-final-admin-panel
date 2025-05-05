@@ -1,7 +1,10 @@
 "use client";
 import { database } from "@/appwrite";
 import Image from "next/image";
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
+import { useEditorStore } from "@/store/editor-store";
+import { toast } from "sonner";
+import * as fabric from "fabric";
 
 interface Frame {
   $id: string;
@@ -24,9 +27,42 @@ interface FramesResponse {
 }
 
 const Frames = () => {
-  const [frames, setFrames] = React.useState<FramesResponse>({ documents: [], total: 0 });
+  const [frames, setFrames] = React.useState<FramesResponse>({
+    documents: [],
+    total: 0,
+  });
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+
+  const applyFrame = async (frame: Frame) => {
+    try {
+      const frameData = JSON.parse(frame.template);
+
+      fabric.util
+        .enlivenObjects(frameData.objects)
+        .then((objects) => {
+          objects.forEach((obj: any) => {
+            if (!obj.hasOwnProperty("label")) {
+              obj.set({
+                label:
+                  obj.type === "text" ||
+                  obj.type === "i-text" ||
+                  obj.type === "textbox"
+                    ? `Text: ${(obj as any).text.substring(0, 10)}...`
+                    : `${obj.type || "Object"}`,
+              });
+            }
+          });
+        })
+        .catch((error: unknown) => {
+          console.error("Error applying frame objects:", error);
+          toast.error("Failed to apply frame objects");
+        });
+    } catch (error: unknown) {
+      console.error("Error applying frame:", error);
+      toast.error("Failed to apply frame");
+    }
+  };
 
   useEffect(() => {
     const fetchFrames = async () => {
