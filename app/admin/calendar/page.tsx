@@ -68,17 +68,17 @@ export default function CalendarPage() {
 
         // Format events for the calendar
         const calendarEvents = events.documents.map((event: any) => {
-          // Get first template for preview image
-          const template =
-            event.template && event.template.length > 0
-              ? event.template[0]
+          // Get first posts for preview image
+          const posts =
+            event.posts && event.posts.length > 0
+              ? event.posts[0]
               : null;
 
           const eventDate = new Date(event.date);
 
           return {
             id: event.$id,
-            title: template?.name || "Template Event",
+            title: posts?.name || "posts Event",
             start: eventDate,
             end: eventDate,
             allDay: true,
@@ -90,7 +90,7 @@ export default function CalendarPage() {
         setFormattedEvents(calendarEvents);
       } catch (error) {
         console.error("Failed to fetch documents:", error);
-        toast.error("Failed to load template events");
+        toast.error("Failed to load posts events");
       }
     };
 
@@ -140,7 +140,7 @@ export default function CalendarPage() {
   const handleSelectSlot = ({ start }: { start: Date }) => {
     // Disable selecting past dates
     if (isBefore(start, today)) {
-      toast.error("Cannot assign templates to past dates");
+      toast.error("Cannot assign postss to past dates");
       return;
     }
 
@@ -175,7 +175,7 @@ export default function CalendarPage() {
       ...prev,
       {
         id: newEvent.$id,
-        title: newEvent.template?.[0]?.name || "Template Event",
+        title: newEvent.posts?.[0]?.name || "posts Event",
         start: new Date(newEvent.date),
         end: new Date(newEvent.date),
         allDay: true,
@@ -206,7 +206,7 @@ export default function CalendarPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <CalendarLucide className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-bold">Template Calendar</h1>
+            <h1 className="text-3xl font-bold">posts Calendar</h1>
           </div>
           <div>
             <Button
@@ -221,9 +221,9 @@ export default function CalendarPage() {
         </div>
 
         <p className="text-muted-foreground mb-6">
-          Assign templates to specific dates. Past dates are disabled.
+          Assign postss to specific dates. Past dates are disabled.
           <span className="text-blue-500 font-medium ml-1">
-            Dates with assigned templates are highlighted in blue
+            Dates with assigned postss are highlighted in blue
           </span>
           .
         </p>
@@ -275,28 +275,28 @@ export default function CalendarPage() {
                       </h3>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {event.template &&
-                          event.template.map(
-                            (template: any, tIndex: number) => (
+                        {event.posts &&
+                          event.posts.map(
+                            (posts: any, tIndex: number) => (
                               <div
-                                key={template.$id || tIndex}
+                                key={posts.$id || tIndex}
                                 className="flex flex-col gap-2 border rounded-md p-3 bg-gray-50"
                               >
-                                {template.previewImage && (
+                                {posts.previewImage && (
                                   <div className="relative w-full h-32">
                                     <Image
-                                      src={template.previewImage}
-                                      alt={template.name || "Template preview"}
+                                      src={posts.previewImage}
+                                      alt={posts.name || "posts preview"}
                                       fill
                                       className="object-contain rounded-md"
                                     />
                                   </div>
                                 )}
                                 <p className="font-medium">
-                                  {template.name || "Untitled Template"}
+                                  {posts.name || "Untitled posts"}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {template.width} x {template.height}px
+                                  {posts.width} x {posts.height}px
                                 </p>
                               </div>
                             )
