@@ -17,7 +17,7 @@ const page = async () => {
   // Fetch all frames from the database
   const frames = await database.listDocuments(
     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-    process.env.NEXT_PUBLIC_APPWRITE_FRAMES_COLLECTION_ID as string
+    "6815de5300077ef22735"
   );
 
   return (
