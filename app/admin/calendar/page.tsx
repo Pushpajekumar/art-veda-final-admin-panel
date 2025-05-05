@@ -70,9 +70,7 @@ export default function CalendarPage() {
         const calendarEvents = events.documents.map((event: any) => {
           // Get first posts for preview image
           const posts =
-            event.posts && event.posts.length > 0
-              ? event.posts[0]
-              : null;
+            event.posts && event.posts.length > 0 ? event.posts[0] : null;
 
           const eventDate = new Date(event.date);
 
@@ -200,6 +198,8 @@ export default function CalendarPage() {
     setShowEventsDialog(true);
   };
 
+  console.log(events, "Events 🟡");
+
   return (
     <div className="container mx-auto p-6">
       <Card className="p-6 mb-8 bg-white shadow-lg border-0">
@@ -270,37 +270,31 @@ export default function CalendarPage() {
                     className="p-4 border border-gray-200"
                   >
                     <div className="flex flex-col gap-3">
-                      <h3 className="text-lg font-semibold">
-                        {format(new Date(event.date), "h:mm a")}
-                      </h3>
-
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {event.posts &&
-                          event.posts.map(
-                            (posts: any, tIndex: number) => (
-                              <div
-                                key={posts.$id || tIndex}
-                                className="flex flex-col gap-2 border rounded-md p-3 bg-gray-50"
-                              >
-                                {posts.previewImage && (
-                                  <div className="relative w-full h-32">
-                                    <Image
-                                      src={posts.previewImage}
-                                      alt={posts.name || "posts preview"}
-                                      fill
-                                      className="object-contain rounded-md"
-                                    />
-                                  </div>
-                                )}
-                                <p className="font-medium">
-                                  {posts.name || "Untitled posts"}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {posts.width} x {posts.height}px
-                                </p>
-                              </div>
-                            )
-                          )}
+                          event.posts.map((posts: any, tIndex: number) => (
+                            <div
+                              key={posts.$id || tIndex}
+                              className="flex flex-col gap-2 border rounded-md p-3 bg-gray-50"
+                            >
+                              {posts.previewImage && (
+                                <div className="relative w-full h-32">
+                                  <Image
+                                    src={posts.previewImage}
+                                    alt={posts.name || "posts preview"}
+                                    fill
+                                    className="object-contain rounded-md"
+                                  />
+                                </div>
+                              )}
+                              <p className="font-medium">
+                                {posts.name || "Untitled posts"}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {posts.width} x {posts.height}px
+                              </p>
+                            </div>
+                          ))}
                       </div>
                     </div>
                   </Card>

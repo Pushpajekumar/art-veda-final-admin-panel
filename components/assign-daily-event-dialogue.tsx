@@ -89,24 +89,21 @@ const AssignDailyEvent = ({
       if (existingDocument.total > 0) {
         console.log("Updating existing document");
 
-        const existingTemplates = existingDocument.documents[0].template || [];
-        //TODO: Check if the template already exists in the array
-        // Only add the new template if it's not already in the array
-        if (!existingTemplates.includes(selectedTemplate)) {
+        const existingPosts = existingDocument.documents[0].posts || [];
+        // Check if the template already exists in the array
+        if (!existingPosts.includes(selectedTemplate)) {
           await database.updateDocument(
             process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
             process.env.NEXT_PUBLIC_APPWRITE_DAILY_EVENT_ID as string,
             existingDocument.documents[0].$id,
             {
               date: dateToStore.toISOString(),
-              posts: [...existingTemplates, selectedTemplate], // Append new template to existing ones
+              posts: [...existingPosts, selectedTemplate], // Append new template to existing ones
             }
           );
+          toast.success("Template assigned successfully");
         } else {
           toast.info("This template is already assigned to this date");
-          setIsDialogOpen(false);
-          setIsLoading(false);
-          return;
         }
       } else {
         await database.createDocument(
@@ -118,9 +115,9 @@ const AssignDailyEvent = ({
             posts: [selectedTemplate],
           }
         );
+        toast.success("Template assigned successfully");
       }
       setIsDialogOpen(false);
-      toast.success("Template assigned successfully");
     } catch (error) {
       console.error("Error assigning template:", error);
       toast.error("Failed to assign template");
