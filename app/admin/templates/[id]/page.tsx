@@ -15,7 +15,7 @@ const page = async ({ params }: Props) => {
   // Here you can use the id to fetch data or perform any operations
   const templates = await database.getDocument(
     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-    process.env.NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID!,
+    process.env.NEXT_PUBLIC_APPWRITE_POSTS_COLLECTION_ID!,
     id
   );
 

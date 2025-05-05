@@ -91,7 +91,7 @@ const TypeOfPost: React.FC<TypeOfPostProps> = ({ onSelectPostType }) => {
       if (width && height) {
         const template = await database.createDocument(
           process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-          process.env.NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID!,
+          process.env.NEXT_PUBLIC_APPWRITE_POSTS_COLLECTION_ID!,
           ID.unique(),
           { width: width, height: height }
         );

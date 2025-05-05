@@ -5,7 +5,7 @@ import TemplateCard from "./template-card";
 const Templates = async () => {
   const templates = await database.listDocuments(
     process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-    process.env.NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID!
+    process.env.NEXT_PUBLIC_APPWRITE_POSTS_COLLECTION_ID!
   );
 
   console.log(templates);

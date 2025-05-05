@@ -47,7 +47,7 @@ const AssignDailyEvent = ({
       try {
         const response = await database.listDocuments(
           process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-          process.env.NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID as string,
+          process.env.NEXT_PUBLIC_APPWRITE_POSTS_COLLECTION_ID as string,
           [Query.select(["name", "$id"])]
         );
 

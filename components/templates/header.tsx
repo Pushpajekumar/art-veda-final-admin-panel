@@ -96,8 +96,7 @@ function Header({ isFrame = false }) {
           // Determine which collection to save to based on whether this is a frame or template
           const collectionId = isFrame
             ? (process.env.NEXT_PUBLIC_APPWRITE_FRAMES_COLLECTION_ID as string)
-            : (process.env
-                .NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID as string);
+            : (process.env.NEXT_PUBLIC_APPWRITE_POSTS_COLLECTION_ID as string);
 
           await database.updateDocument(
             process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,

@@ -39,7 +39,7 @@ export function CustomeButton() {
 
       const template = await database.createDocument(
         process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-        process.env.NEXT_PUBLIC_APPWRITE_TEMPLATE_COLLECTION_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_POSTS_COLLECTION_ID!,
         ID.unique(),
         { width: parsedWidth, height: parsedHeight }
       );
