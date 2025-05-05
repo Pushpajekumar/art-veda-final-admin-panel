@@ -16,7 +16,7 @@ import CreateFrame from "@/components/frames/create-frame";
 const page = async () => {
   // Fetch all frames from the database
   const frames = await database.listDocuments(
-    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+    '6815de2b0004b53475ecs',
     "6815de5300077ef22735"
   );
 
