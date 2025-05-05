@@ -99,7 +99,7 @@ const AssignDailyEvent = ({
             existingDocument.documents[0].$id,
             {
               date: dateToStore.toISOString(),
-              template: [...existingTemplates, selectedTemplate], // Append new template to existing ones
+              posts: [...existingTemplates, selectedTemplate], // Append new template to existing ones
             }
           );
         } else {
@@ -115,7 +115,7 @@ const AssignDailyEvent = ({
           ID.unique(),
           {
             date: dateToStore.toISOString(),
-            template: [selectedTemplate],
+            posts: [selectedTemplate],
           }
         );
       }
