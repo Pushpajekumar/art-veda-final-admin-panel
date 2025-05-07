@@ -3,6 +3,9 @@ import { columns } from "@/components/users/columns";
 import { DataTable } from "@/components/users/data-table";
 import React from "react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export type User = {
   id: string;
   name: string;
