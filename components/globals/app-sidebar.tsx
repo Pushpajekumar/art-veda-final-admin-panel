@@ -8,6 +8,7 @@ import {
   UsersRound,
   LogOut,
   Calendar,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
@@ -57,6 +58,11 @@ const items = [
     title: "Calendar",
     url: "/admin/calendar",
     icon: Calendar,
+  },
+  {
+    title: "Send Push Notifications",
+    url: "/admin/send-push-notifications",
+    icon: Bell,
   },
 ];
 
