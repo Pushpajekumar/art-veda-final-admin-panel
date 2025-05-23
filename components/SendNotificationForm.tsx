@@ -55,7 +55,15 @@ const FormSchema = z.object({
     ),
 });
 
-export default function SendNotificationForm() {
+export default function SendNotificationForm({
+  userTokens,
+  onSuccess,
+  onError,
+}: {
+  userTokens: string[];
+  onSuccess: () => void;
+  onError: (error: Error) => void;
+}) {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
