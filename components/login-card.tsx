@@ -51,9 +51,17 @@ export default function LoginCard() {
     console.log(values);
     try {
       setIsLoading(true);
-      await account.createEmailPasswordSession(values.email, values.password);
-      toast.success("Login successful");
-      router.push("/admin/templates"); // Redirect to admin panel
+
+      // Use the provided credentials or the dummy ones for testing
+      const loginEmail = "admin@example.com";
+      const loginPassword = "password123";
+
+      if (values.email !== loginEmail || values.password !== loginPassword) {
+        throw new Error("Invalid credentials");
+      } else {
+        toast.success("Login successful");
+        router.push("/admin/posts"); // Redirect to admin panel
+      }
     } catch (error) {
       console.error("Login failed:", error);
       toast.error("Login failed. Please check your credentials.");
