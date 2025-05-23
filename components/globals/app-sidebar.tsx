@@ -30,6 +30,11 @@ import { useRouter } from "next/navigation";
 
 const items = [
   {
+    title: "Dashboard",
+    url: "/admin/dashboard",
+    icon: BookTemplate,
+  },
+  {
     title: "Posts",
     url: "/admin/posts",
     icon: BookTemplate,
