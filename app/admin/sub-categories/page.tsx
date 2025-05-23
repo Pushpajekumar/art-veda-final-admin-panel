@@ -16,7 +16,7 @@ import { CreateSubCategory } from "@/components/subcategories/create-subcategori
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const page = async () => {
+ const page = async () => {
   const [subCategories, categories] = await Promise.all([
     database.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
