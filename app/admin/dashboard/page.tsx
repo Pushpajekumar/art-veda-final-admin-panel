@@ -96,7 +96,7 @@ const Dashboard = async () => {
                       <div
                         key={index}
                         className="border rounded-lg p-3 bg-gray-50"
-                      >
+                      >bu
                         {post.previewImage && (
                           <div className="mb-2 h-40 overflow-hidden rounded">
                             <img
