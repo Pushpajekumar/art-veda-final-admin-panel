@@ -8,7 +8,7 @@ import {
   Image,
   Frame,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 import { useEditorStore } from "@/store/editor-store";
 import TextPanel from "./text";
@@ -25,43 +25,50 @@ function Sidebar() {
       id: "text",
       icon: Type,
       label: "Text",
-      panel: () => <TextPanel />,
+      panel: TextPanel,
     },
     {
       id: "uploads",
       icon: Upload,
       label: "Uploads",
-      panel: () => <UploadPanel />,
+      panel: UploadPanel,
     },
     {
       id: "background",
       icon: Image,
       label: "Background",
-      panel: () => <BackgroundPanel />,
+      panel: BackgroundPanel,
     },
     {
       id: "frames",
       icon: Frame,
       label: "Frames",
-      panel: () => <Frames />,
+      panel: Frames,
     },
   ];
 
-  const handleItemClick = (id: string) => {
-    if (id === activeSidebar && !isPanelCollapsed) return;
+  const handleItemClick = useCallback(
+    (id: string) => {
+      if (id === activeSidebar && !isPanelCollapsed) return;
 
-    setActiveSidebar(id);
-    setIsPanelCollapsed(false);
-  };
+      setActiveSidebar(id);
+      setIsPanelCollapsed(false);
+    },
+    [activeSidebar, isPanelCollapsed]
+  );
 
-  const closeSecondaryPanel = () => {
+  const closeSecondaryPanel = useCallback(() => {
     setActiveSidebar(null);
-  };
+    setIsPanelCollapsed(false);
+  }, []);
 
-  const togglePanelCollapse = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsPanelCollapsed(!isPanelCollapsed);
-  };
+  const togglePanelCollapse = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setIsPanelCollapsed(!isPanelCollapsed);
+    },
+    [isPanelCollapsed]
+  );
 
   const activeItem = sidebarItems.find((item) => item.id === activeSidebar);
 
@@ -88,6 +95,7 @@ function Sidebar() {
             width: isPanelCollapsed ? "0" : "320px",
             opacity: isPanelCollapsed ? 0 : 1,
             overflow: isPanelCollapsed ? "hidden" : "visible",
+            transition: "width 0.3s ease, opacity 0.3s ease",
           }}
         >
           <div className="panel-header">
@@ -96,9 +104,15 @@ function Sidebar() {
             </button>
             <span className="panel-title">{activeItem?.label}</span>
           </div>
-          <div className="panel-content">{activeItem?.panel()}</div>
+          <div className="panel-content">
+            {activeItem && <activeItem.panel />}
+          </div>
           <button className="collapse-button" onClick={togglePanelCollapse}>
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft
+              className={`h-5 w-5 transition-transform ${
+                isPanelCollapsed ? "rotate-180" : ""
+              }`}
+            />
           </button>
         </div>
       )}

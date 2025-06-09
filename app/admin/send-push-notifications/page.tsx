@@ -11,6 +11,17 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const setTestTokens = useCallback(() => {
+    // Test tokens for development - replace these with actual user tokens
+    const tokens = [
+      "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", // Replace with actual tokens
+      "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
+      "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]",
+    ];
+    setUserTokens(tokens);
+    console.log("Using test tokens for development");
+  }, []);
+
   const fetchUserTokens = useCallback(async () => {
     try {
       setLoading(true);
@@ -18,6 +29,12 @@ export default function NotificationsPage() {
 
       // Try to fetch from actual users collection
       try {
+        if (!process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID) {
+          console.log("Users collection ID not configured, using test tokens");
+          setTestTokens();
+          return;
+        }
+
         const response = await database.listDocuments(
           process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
           process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!
@@ -46,18 +63,7 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const setTestTokens = () => {
-    // Test tokens for development - replace these with actual user tokens
-    const tokens = [
-      "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", // Replace with actual tokens
-      "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
-      "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]",
-    ];
-    setUserTokens(tokens);
-    console.log("Using test tokens for development");
-  };
+  }, [setTestTokens]);
 
   useEffect(() => {
     fetchUserTokens();

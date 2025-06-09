@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { database } from "@/appwrite";
+import { database, Query } from "@/appwrite";
 import Link from "next/link";
 import Image from "next/image";
 import CreateFrame from "@/components/frames/create-frame";
@@ -26,29 +26,54 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
+
+const ITEMS_PER_PAGE = 9;
 
 const Page = () => {
   const [frames, setFrames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [total, setTotal] = useState(0);
+
+  const fetchFrames = async (page: number) => {
+    try {
+      setLoading(true);
+      const offset = (page - 1) * ITEMS_PER_PAGE;
+
+      const framesData = await database.listDocuments(
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+        process.env.NEXT_PUBLIC_APPWRITE_FRAMES_COLLECTION_ID as string,
+        [
+          Query.limit(ITEMS_PER_PAGE),
+          Query.offset(offset),
+          Query.orderDesc("$createdAt"),
+        ]
+      );
+
+      setFrames(framesData.documents);
+      setTotal(framesData.total);
+      setTotalPages(Math.ceil(framesData.total / ITEMS_PER_PAGE));
+    } catch (error) {
+      console.error("Error fetching frames:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchFrames = async () => {
-      try {
-        const framesData = await database.listDocuments(
-          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-          process.env.NEXT_PUBLIC_APPWRITE_FRAMES_COLLECTION_ID as string
-        );
-        setFrames(framesData.documents);
-      } catch (error) {
-        console.error("Error fetching frames:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFrames();
-  }, []);
+    fetchFrames(currentPage);
+  }, [currentPage]);
 
   const handleDeleteFrame = async (frameId: string) => {
     setDeletingId(frameId);
@@ -61,12 +86,118 @@ const Page = () => {
 
       toast.success("Frame deleted successfully");
       setFrames((prev) => prev.filter((frame) => frame.$id !== frameId));
+      setTotal((prev) => prev - 1);
+
+      // If current page becomes empty and it's not the first page, go to previous page
+      if (frames.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
     } catch (error) {
       console.error("Error deleting frame:", error);
       toast.error("Failed to delete frame");
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => handlePageChange(i)}
+              isActive={currentPage === i}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      // Show ellipsis logic for larger page counts
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          items.push(
+            <PaginationItem key={i}>
+              <PaginationLink
+                onClick={() => handlePageChange(i)}
+                isActive={currentPage === i}
+              >
+                {i}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        }
+        items.push(<PaginationEllipsis key="ellipsis" />);
+        items.push(
+          <PaginationItem key={totalPages}>
+            <PaginationLink onClick={() => handlePageChange(totalPages)}>
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      } else if (currentPage >= totalPages - 2) {
+        items.push(
+          <PaginationItem key={1}>
+            <PaginationLink onClick={() => handlePageChange(1)}>
+              1
+            </PaginationLink>
+          </PaginationItem>
+        );
+        items.push(<PaginationEllipsis key="ellipsis" />);
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          items.push(
+            <PaginationItem key={i}>
+              <PaginationLink
+                onClick={() => handlePageChange(i)}
+                isActive={currentPage === i}
+              >
+                {i}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        }
+      } else {
+        items.push(
+          <PaginationItem key={1}>
+            <PaginationLink onClick={() => handlePageChange(1)}>
+              1
+            </PaginationLink>
+          </PaginationItem>
+        );
+        items.push(<PaginationEllipsis key="ellipsis1" />);
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          items.push(
+            <PaginationItem key={i}>
+              <PaginationLink
+                onClick={() => handlePageChange(i)}
+                isActive={currentPage === i}
+              >
+                {i}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        }
+        items.push(<PaginationEllipsis key="ellipsis2" />);
+        items.push(
+          <PaginationItem key={totalPages}>
+            <PaginationLink onClick={() => handlePageChange(totalPages)}>
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    }
+
+    return items;
   };
 
   if (loading) {
@@ -172,6 +303,43 @@ const Page = () => {
           ))
         )}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex flex-col items-center space-y-4 mt-8">
+          <div className="text-sm text-gray-600">
+            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
+            {Math.min(currentPage * ITEMS_PER_PAGE, total)} of {total} frames
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  className={
+                    currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                  }
+                />
+              </PaginationItem>
+
+              {renderPaginationItems()}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    handlePageChange(Math.min(totalPages, currentPage + 1))
+                  }
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 };
