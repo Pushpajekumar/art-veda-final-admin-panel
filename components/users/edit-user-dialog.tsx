@@ -35,7 +35,7 @@ const editUserSchema = z.object({
   address: z.string().optional(),
   occupation: z.string().optional(),
   gender: z.string().optional(),
-  isPremium: z.boolean(),
+  // isPremium: z.boolean(),
 });
 
 type EditUserFormData = z.infer<typeof editUserSchema>;
@@ -45,7 +45,7 @@ interface User {
   name: string;
   email: string;
   phone?: string;
-  isPremium: boolean;
+  // isPremium: boolean;
   createdAt: string;
   address?: string;
   occupation?: string;
@@ -70,7 +70,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
       address: user.address || "",
       occupation: user.occupation || "",
       gender: user.gender || "",
-      isPremium: user.isPremium || false,
+      // isPremium: user.isPremium || false,
     },
   });
 
@@ -88,7 +88,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
           address: data.address || "",
           occupation: data.occupation || "",
           gender: data.gender || "",
-          isPremium: data.isPremium,
+          // isPremium: data.isPremium,
         }
       );
 
@@ -100,7 +100,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
         address: data.address || "",
         occupation: data.occupation || "",
         gender: data.gender || "",
-        isPremium: data.isPremium,
+        // isPremium: data.isPremium,
       };
 
       onUserUpdated(updatedUser);
@@ -228,7 +228,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
           </div>
 
           {/* Premium Status */}
-          <div className="flex items-center justify-between rounded-lg border p-3">
+          {/* <div className="flex items-center justify-between rounded-lg border p-3">
             <div className="space-y-0.5">
               <Label>Premium Status</Label>
               <p className="text-sm text-gray-500">
@@ -240,7 +240,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
               onCheckedChange={(checked) => form.setValue("isPremium", checked)}
               disabled={isLoading}
             />
-          </div>
+          </div> */}
 
           {/* Action Buttons */}
           <div className="flex gap-2 pt-4">
