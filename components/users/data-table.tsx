@@ -20,6 +20,15 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 
 // Helper function to format ISO date strings
 const formatDate = (isoString: string) => {
@@ -37,14 +46,24 @@ const formatDate = (isoString: string) => {
   }
 };
 
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+}
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  pagination?: PaginationProps;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  pagination,
 }: DataTableProps<TData, TValue>) {
   const [searchValue, setSearchValue] = useState("");
   const [filteredData, setFilteredData] = useState<TData[]>(data);
@@ -87,17 +106,119 @@ export function DataTable<TData, TValue>({
     setFilteredData(data);
   }, [data]);
 
+  const renderPaginationItems = () => {
+    if (!pagination) return null;
+
+    const { currentPage, totalPages, onPageChange } = pagination;
+    const items = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => onPageChange(i)}
+              isActive={currentPage === i}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      // Show ellipsis logic for larger page counts
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          items.push(
+            <PaginationItem key={i}>
+              <PaginationLink
+                onClick={() => onPageChange(i)}
+                isActive={currentPage === i}
+              >
+                {i}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        }
+        items.push(<PaginationEllipsis key="ellipsis" />);
+        items.push(
+          <PaginationItem key={totalPages}>
+            <PaginationLink onClick={() => onPageChange(totalPages)}>
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      } else if (currentPage >= totalPages - 2) {
+        items.push(
+          <PaginationItem key={1}>
+            <PaginationLink onClick={() => onPageChange(1)}>1</PaginationLink>
+          </PaginationItem>
+        );
+        items.push(<PaginationEllipsis key="ellipsis" />);
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          items.push(
+            <PaginationItem key={i}>
+              <PaginationLink
+                onClick={() => onPageChange(i)}
+                isActive={currentPage === i}
+              >
+                {i}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        }
+      } else {
+        items.push(
+          <PaginationItem key={1}>
+            <PaginationLink onClick={() => onPageChange(1)}>1</PaginationLink>
+          </PaginationItem>
+        );
+        items.push(<PaginationEllipsis key="ellipsis1" />);
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          items.push(
+            <PaginationItem key={i}>
+              <PaginationLink
+                onClick={() => onPageChange(i)}
+                isActive={currentPage === i}
+              >
+                {i}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        }
+        items.push(<PaginationEllipsis key="ellipsis2" />);
+        items.push(
+          <PaginationItem key={totalPages}>
+            <PaginationLink onClick={() => onPageChange(totalPages)}>
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    }
+
+    return items;
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search by name, email, phone, or date..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="pl-10 max-w-sm bg-gray-50 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-          />
+        <div className="flex items-center justify-between">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search by name, email, phone, or date..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              className="pl-10 bg-gray-50 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+          </div>
+          {pagination && (
+            <div className="text-sm text-gray-500 ml-4">
+              Page {pagination.currentPage} of {pagination.totalPages}
+            </div>
+          )}
         </div>
       </div>
 
@@ -148,7 +269,14 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-32 text-center text-gray-500"
                 >
-                  No results found.
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <div className="text-gray-400">No users found.</div>
+                    {searchValue && (
+                      <div className="text-xs text-gray-400">
+                        Try adjusting your search terms
+                      </div>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -156,9 +284,72 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      <div className="flex justify-between items-center text-xs text-gray-500">
-        <span>{table.getRowModel().rows.length} results</span>
-        {searchValue && <span>Filtered from {data.length} total records</span>}
+      {/* Server-side Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex flex-col items-center space-y-4">
+          <div className="text-sm text-gray-600">
+            Showing {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}{" "}
+            to{" "}
+            {Math.min(
+              pagination.currentPage * pagination.itemsPerPage,
+              pagination.totalItems
+            )}{" "}
+            of {pagination.totalItems} users
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() =>
+                    pagination.onPageChange(
+                      Math.max(1, pagination.currentPage - 1)
+                    )
+                  }
+                  className={
+                    pagination.currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+
+              {renderPaginationItems()}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    pagination.onPageChange(
+                      Math.min(
+                        pagination.totalPages,
+                        pagination.currentPage + 1
+                      )
+                    )
+                  }
+                  className={
+                    pagination.currentPage === pagination.totalPages
+                      ? "pointer-events-none opacity-50"
+                      : ""
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+
+      {/* Summary Information */}
+      <div className="flex justify-between items-center text-xs text-gray-500 border-t pt-4">
+        <span>
+          {table.getRowModel().rows.length} users{" "}
+          {searchValue ? "filtered" : "on this page"}
+        </span>
+        {pagination && (
+          <span>
+            {searchValue
+              ? `Search results from ${pagination.totalItems} total users`
+              : `Total: ${pagination.totalItems} users across ${pagination.totalPages} pages`}
+          </span>
+        )}
       </div>
     </div>
   );
