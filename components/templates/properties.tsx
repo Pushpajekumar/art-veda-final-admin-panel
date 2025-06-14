@@ -20,7 +20,6 @@ import {
   AlignHorizontalSpaceAround,
   AlignLeft,
   AlignRight,
-  AlignTop,
   AlignVerticalSpaceAround,
   Bold,
   Copy,
