@@ -81,12 +81,11 @@ export function DataTable<TData, TValue>({
       rowData.name?.toLowerCase().includes(value.toLowerCase()) ||
       rowData.email?.toLowerCase().includes(value.toLowerCase()) ||
       rowData.phone?.toLowerCase().includes(value.toLowerCase()) ||
+      rowData.address?.toLowerCase().includes(value.toLowerCase()) ||
+      rowData.occupation?.toLowerCase().includes(value.toLowerCase()) ||
+      rowData.gender?.toLowerCase().includes(value.toLowerCase()) ||
       formattedCreatedAt.toLowerCase().includes(value.toLowerCase()) ||
-      Object.values(rowData).some(
-        (val) =>
-          typeof val === "string" &&
-          val.toLowerCase().includes(value.toLowerCase())
-      )
+      (rowData.isPremium ? "premium" : "free").includes(value.toLowerCase())
     );
   };
 
@@ -208,7 +207,7 @@ export function DataTable<TData, TValue>({
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
-              placeholder="Search by name, email, phone, or date..."
+              placeholder="Search users by any field..."
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               className="pl-10 bg-gray-50 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
@@ -308,7 +307,7 @@ export function DataTable<TData, TValue>({
                   className={
                     pagination.currentPage === 1
                       ? "pointer-events-none opacity-50"
-                      : ""
+                      : "cursor-pointer"
                   }
                 />
               </PaginationItem>
@@ -328,7 +327,7 @@ export function DataTable<TData, TValue>({
                   className={
                     pagination.currentPage === pagination.totalPages
                       ? "pointer-events-none opacity-50"
-                      : ""
+                      : "cursor-pointer"
                   }
                 />
               </PaginationItem>
@@ -341,12 +340,12 @@ export function DataTable<TData, TValue>({
       <div className="flex justify-between items-center text-xs text-gray-500 border-t pt-4">
         <span>
           {table.getRowModel().rows.length} users{" "}
-          {searchValue ? "filtered" : "on this page"}
+          {searchValue ? "filtered on this page" : "on this page"}
         </span>
         {pagination && (
           <span>
             {searchValue
-              ? `Search results from ${pagination.totalItems} total users`
+              ? `Client-side filtered from ${data.length} page results`
               : `Total: ${pagination.totalItems} users across ${pagination.totalPages} pages`}
           </span>
         )}

@@ -18,7 +18,7 @@ import {
 import { toast } from "sonner";
 import Image from "next/image";
 
-const IMAGES_PER_PAGE = 10;
+const IMAGES_PER_PAGE = 6;
 
 function UploadPanel() {
   const { canvas } = useEditorStore();
@@ -30,7 +30,7 @@ function UploadPanel() {
   >([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);  
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
 
@@ -58,6 +58,7 @@ function UploadPanel() {
       setUserUploads(formattedImages);
       setTotal(images.total);
       setTotalPages(Math.ceil(images.total / IMAGES_PER_PAGE));
+      setCurrentPage(page);
     } catch (error) {
       console.error("Error fetching images:", error);
       toast.error("Failed to load your uploads");
@@ -116,7 +117,6 @@ function UploadPanel() {
 
       toast.success("File uploaded successfully");
       await getUploadedImages(1); // Go to first page to see the new upload
-      setCurrentPage(1);
       clearSelectedFile();
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -127,7 +127,7 @@ function UploadPanel() {
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    getUploadedImages(page);
   };
 
   const handleAddImage = (imageUrl: string) => {
@@ -261,17 +261,17 @@ function UploadPanel() {
                       </PaginationItem>
 
                       {Array.from(
-                        { length: Math.min(5, totalPages) },
+                        { length: Math.min(3, totalPages) },
                         (_, i) => {
                           let pageNum;
-                          if (totalPages <= 5) {
+                          if (totalPages <= 3) {
                             pageNum = i + 1;
-                          } else if (currentPage <= 3) {
+                          } else if (currentPage <= 2) {
                             pageNum = i + 1;
-                          } else if (currentPage >= totalPages - 2) {
-                            pageNum = totalPages - 4 + i;
+                          } else if (currentPage >= totalPages - 1) {
+                            pageNum = totalPages - 2 + i;
                           } else {
-                            pageNum = currentPage - 2 + i;
+                            pageNum = currentPage - 1 + i;
                           }
 
                           return (

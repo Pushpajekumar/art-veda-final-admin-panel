@@ -16,11 +16,34 @@ export type User = {
   address?: string;
   occupation?: string;
   gender?: string;
+  profileImage?: string;
 };
 
 export const createColumns = (
   onUserUpdated: (updatedUser: User) => void
 ): ColumnDef<User>[] => [
+  {
+    accessorKey: "profileImage",
+    header: "Profile Picture",
+    cell: ({ row }) => {
+      const profileImage = row.getValue("profileImage") as string | undefined;
+      return (
+        <div className="flex items-center justify-center w-10 h-10">
+          {profileImage ? (
+            <img
+              src={profileImage}
+              alt="Profile"
+              className="w-full h-full rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+              No Img
+            </div>
+          )}
+        </div>
+      );
+    },
+  },
   {
     accessorKey: "name",
     header: "Name",
@@ -83,6 +106,8 @@ export const createColumns = (
       return (
         <div className="flex items-center space-x-2">
           <ViewUserDialog user={user} />
+          {/* //TODO: typescript error here, need to fix */}
+          {/* @ts-expect-error */}
           <EditUserDialog user={user} onUserUpdated={onUserUpdated} />
         </div>
       );

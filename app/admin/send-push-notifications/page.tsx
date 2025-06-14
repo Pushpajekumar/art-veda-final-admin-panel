@@ -4,66 +4,57 @@ import SendNotificationForm from "@/components/SendNotificationForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Bell, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { database } from "@/appwrite";
+import { database, Query } from "@/appwrite";
 
 export default function NotificationsPage() {
   const [userTokens, setUserTokens] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const setTestTokens = useCallback(() => {
-    // Test tokens for development - replace these with actual user tokens
-    const tokens = [
-      "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", // Replace with actual tokens
-      "ExponentPushToken[yyyyyyyyyyyyyyyyyyyyyy]",
-      "ExponentPushToken[zzzzzzzzzzzzzzzzzzzzzz]",
-    ];
-    setUserTokens(tokens);
-    console.log("Using test tokens for development");
-  }, []);
-
   const fetchUserTokens = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Try to fetch from actual users collection
-      try {
-        if (!process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID) {
-          console.log("Users collection ID not configured, using test tokens");
-          setTestTokens();
-          return;
-        }
-
-        const response = await database.listDocuments(
-          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
-          process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!
-        );
-
-        const tokens = response.documents
-          .map((user: any) => user.pushToken || user.expoPushToken)
-          .filter(Boolean);
-
-        if (tokens.length > 0) {
-          setUserTokens(tokens);
-          console.log(`Found ${tokens.length} user tokens from database`);
-        } else {
-          // If no tokens in database, use test tokens
-          console.log("No user tokens found in database, using test tokens");
-          setTestTokens();
-        }
-      } catch (dbError) {
-        console.log("Database fetch failed, using test tokens:", dbError);
-        setTestTokens();
+      if (!process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID) {
+        throw new Error("Users collection ID not configured");
       }
+
+      // Fetch all users with push tokens
+      const response = await database.listDocuments(
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+        [
+          Query.select(["pushToken", "expoPushToken", "fcmToken"]),
+          Query.limit(1000), // Get up to 1000 users with tokens
+        ]
+      );
+
+      const tokens = response.documents
+        .map(
+          (user: any) => user.pushToken || user.expoPushToken || user.fcmToken
+        )
+        .filter(Boolean);
+
+      setUserTokens(tokens);
+
+      if (tokens.length === 0) {
+        setError(
+          "No users with push tokens found. Make sure users have registered for push notifications."
+        );
+      }
+
+      console.log(`Found ${tokens.length} user tokens from database`);
     } catch (error) {
       console.error("Error fetching user tokens:", error);
-      setError("Failed to fetch user tokens. Please try again.");
+      setError(
+        "Failed to fetch user tokens. Please check your database configuration."
+      );
       toast.error("Failed to load user data");
     } finally {
       setLoading(false);
     }
-  }, [setTestTokens]);
+  }, []);
 
   useEffect(() => {
     fetchUserTokens();
@@ -149,32 +140,34 @@ export default function NotificationsPage() {
               <p className="text-sm text-gray-600">Reachable Users</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">Ready</p>
+              <p className="text-2xl font-bold text-blue-600">
+                {userTokens.length > 0 ? "Ready" : "Not Ready"}
+              </p>
               <p className="text-sm text-gray-600">Service Status</p>
             </div>
-          </div>
-
-          {/* Debug info */}
-          <div className="mt-4 p-3 bg-gray-50 rounded-md">
-            <p className="text-xs text-gray-600">
-              Debug: Using{" "}
-              {userTokens.length === 3 ? "test tokens" : "database tokens"}
-            </p>
-            {userTokens.length > 0 && (
-              <p className="text-xs text-gray-500 mt-1">
-                First token: {userTokens[0].slice(0, 30)}...
-              </p>
-            )}
           </div>
         </CardContent>
       </Card>
 
       {/* Notification Form */}
-      <SendNotificationForm
-        userTokens={userTokens}
-        onSuccess={handleNotificationSuccess}
-        onError={handleNotificationError}
-      />
+      {userTokens.length > 0 ? (
+        <SendNotificationForm
+          userTokens={userTokens}
+          onSuccess={handleNotificationSuccess}
+          onError={handleNotificationError}
+        />
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center text-gray-500">
+              <p>No users available to send notifications to.</p>
+              <p className="text-sm mt-2">
+                Users need to register for push notifications first.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
