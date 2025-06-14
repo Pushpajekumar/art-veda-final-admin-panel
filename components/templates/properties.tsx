@@ -16,6 +16,12 @@ import { fontFamilies } from "@/config";
 import { deletedSelectedObject } from "@/utils/fabric-utils";
 import { useEditorStore } from "@/store/editor-store";
 import {
+  AlignCenter,
+  AlignHorizontalSpaceAround,
+  AlignLeft,
+  AlignRight,
+  AlignTop,
+  AlignVerticalSpaceAround,
   Bold,
   Copy,
   FlipHorizontal,
@@ -28,6 +34,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function Properties() {
   const { canvas, markAsModified } = useEditorStore();
@@ -434,6 +442,93 @@ function Properties() {
     }
   };
 
+  const handleAlignLeft = () => {
+    if (!canvas || !selectedObject) return;
+
+    selectedObject.set({
+      left: 0,
+    });
+    selectedObject.setCoords();
+    canvas.renderAll();
+  };
+
+  const handleAlignCenter = () => {
+    if (!canvas || !selectedObject) return;
+
+    const canvasCenter = canvas.getWidth() / 2;
+    const objectWidth =
+      (selectedObject.width || 0) * (selectedObject.scaleX || 1);
+
+    selectedObject.set({
+      left: canvasCenter - objectWidth / 2,
+    });
+    selectedObject.setCoords();
+    canvas.renderAll();
+  };
+
+  const handleAlignRight = () => {
+    if (!canvas || !selectedObject) return;
+
+    const canvasWidth = canvas.getWidth();
+    const objectWidth =
+      (selectedObject.width || 0) * (selectedObject.scaleX || 1);
+
+    selectedObject.set({
+      left: canvasWidth - objectWidth,
+    });
+    selectedObject.setCoords();
+    canvas.renderAll();
+  };
+
+  const handleAlignTop = () => {
+    if (!canvas || !selectedObject) return;
+
+    selectedObject.set({
+      top: 0,
+    });
+    selectedObject.setCoords();
+    canvas.renderAll();
+  };
+
+  const handleAlignMiddle = () => {
+    if (!canvas || !selectedObject) return;
+
+    const canvasCenter = canvas.getHeight() / 2;
+    const objectHeight =
+      (selectedObject.height || 0) * (selectedObject.scaleY || 1);
+
+    selectedObject.set({
+      top: canvasCenter - objectHeight / 2,
+    });
+    selectedObject.setCoords();
+    canvas.renderAll();
+  };
+
+  const handleAlignBottom = () => {
+    if (!canvas || !selectedObject) return;
+
+    const canvasHeight = canvas.getHeight();
+    const objectHeight =
+      (selectedObject.height || 0) * (selectedObject.scaleY || 1);
+
+    selectedObject.set({
+      top: canvasHeight - objectHeight,
+    });
+    selectedObject.setCoords();
+    canvas.renderAll();
+  };
+
+  const handlePropertyChange = (property: string, value: any) => {
+    if (!canvas || !selectedObject) return;
+
+    selectedObject.set(property, value);
+    selectedObject.setCoords();
+    canvas.renderAll();
+    markAsModified();
+  };
+
+  if (!selectedObject) return null;
+
   return (
     <div className="fixed right-0 top-[56px] bottom-[0px] w-[280px] bg-white border-l border-gray-200 z-10">
       <div className="flex items-center justify-between p-3 border-b">
@@ -801,6 +896,117 @@ function Properties() {
             </div>
           </div>
         )}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Alignment</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* Horizontal Alignment */}
+            <div>
+              <Label className="text-xs text-gray-600 mb-2 block">
+                Horizontal
+              </Label>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAlignLeft}
+                  className="flex-1 h-8"
+                  title="Align Left"
+                >
+                  <AlignLeft className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAlignCenter}
+                  className="flex-1 h-8"
+                  title="Align Center"
+                >
+                  <AlignCenter className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAlignRight}
+                  className="flex-1 h-8"
+                  title="Align Right"
+                >
+                  <AlignRight className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Vertical Alignment */}
+            <div>
+              <Label className="text-xs text-gray-600 mb-2 block">
+                Vertical
+              </Label>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAlignTop}
+                  className="flex-1 h-8"
+                  title="Align Top"
+                >
+                  <AlignVerticalSpaceAround className="h-3 w-3 rotate-180" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAlignMiddle}
+                  className="flex-1 h-8"
+                  title="Align Middle"
+                >
+                  <AlignHorizontalSpaceAround className="h-3 w-3 rotate-90" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAlignBottom}
+                  className="flex-1 h-8"
+                  title="Align Bottom"
+                >
+                  <AlignVerticalSpaceAround className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Position Controls */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">Position</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">X Position</Label>
+                <Input
+                  type="number"
+                  value={selectedObject.left}
+                  onChange={(e) =>
+                    handlePropertyChange("left", Number(e.target.value))
+                  }
+                  className="h-7 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Y Position</Label>
+                <Input
+                  type="number"
+                  value={selectedObject.top}
+                  onChange={(e) =>
+                    handlePropertyChange("top", Number(e.target.value))
+                  }
+                  className="h-7 text-xs"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
