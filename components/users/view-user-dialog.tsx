@@ -34,6 +34,7 @@ interface User {
   address?: string;
   occupation?: string;
   gender?: string;
+  profileImage?: string;
 }
 
 interface ViewUserDialogProps {

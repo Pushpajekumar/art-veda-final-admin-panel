@@ -45,11 +45,12 @@ interface User {
   name: string;
   email: string;
   phone?: string;
-  // isPremium: boolean;
+  isPremium: boolean;
   createdAt: string;
   address?: string;
   occupation?: string;
   gender?: string;
+  profileImage?: string;
 }
 
 interface EditUserDialogProps {

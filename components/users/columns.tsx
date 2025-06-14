@@ -5,44 +5,43 @@ import { formatDate } from "./data-table";
 import { ViewUserDialog } from "./view-user-dialog";
 import { EditUserDialog } from "./edit-user-dialog";
 
-// Define your user type
+// Define your user type to match the page
 export type User = {
   id: string;
   name: string;
   email: string;
   phone?: string;
   isPremium: boolean;
+  profileImage?: string;
   createdAt: string;
   address?: string;
   occupation?: string;
   gender?: string;
-  profileImage?: string;
 };
 
 export const createColumns = (
-  onUserUpdated: (updatedUser: User) => void
+  onUserUpdated: (user: User) => void
 ): ColumnDef<User>[] => [
   {
     accessorKey: "profileImage",
-    header: "Profile Picture",
-    cell: ({ row }) => {
-      const profileImage = row.getValue("profileImage") as string | undefined;
-      return (
-        <div className="flex items-center justify-center w-10 h-10">
-          {profileImage ? (
-            <img
-              src={profileImage}
-              alt="Profile"
-              className="w-full h-full rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
-              No Img
-            </div>
-          )}
-        </div>
-      );
-    },
+    header: "P. Picture",
+    cell: ({ row }) => (
+      <div className="flex items-center">
+        {row.getValue("profileImage") ? (
+          <img
+            src={row.getValue("profileImage") as string}
+            alt="Profile"
+            className="w-8 h-8 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+            <span className="text-xs text-gray-600">
+              {(row.getValue("name") as string)?.charAt(0)?.toUpperCase()}
+            </span>
+          </div>
+        )}
+      </div>
+    ),
   },
   {
     accessorKey: "name",
@@ -93,6 +92,9 @@ export const createColumns = (
           <span className="text-sm font-medium text-gray-900">
             {formatDate(createdAt)}
           </span>
+          <span className="text-xs text-gray-500">
+            {new Date(createdAt).toLocaleDateString()}
+          </span>
         </div>
       );
     },
@@ -106,8 +108,6 @@ export const createColumns = (
       return (
         <div className="flex items-center space-x-2">
           <ViewUserDialog user={user} />
-          {/* //TODO: typescript error here, need to fix */}
-          {/* @ts-expect-error */}
           <EditUserDialog user={user} onUserUpdated={onUserUpdated} />
         </div>
       );
@@ -115,5 +115,5 @@ export const createColumns = (
   },
 ];
 
-// Legacy export for backward compatibility
+// Default export with empty callback for backward compatibility
 export const columns = createColumns(() => {});
