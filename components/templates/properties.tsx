@@ -628,18 +628,29 @@ function Properties() {
           <div className="space-y-4">
             <div className="mb-4">
               <Label
-                htmlFor="elementLabel"
-                className="block text-sm font-medium mb-1"
+              htmlFor="elementLabel"
+              className="block text-sm font-medium mb-1"
               >
-                Element Label
+              Element Label
               </Label>
-              <Input
-                id="elementLabel"
-                value={objectLabel}
-                onChange={handleLabelChange}
-                placeholder="Enter element label"
-                className="w-full"
-              />
+              <Select value={objectLabel} onValueChange={(value) => {
+              setObjectLabel(value);
+              if (selectedObject) {
+                updateObjectProperty("label", value);
+              }
+              }}>
+              <SelectTrigger id="elementLabel" className="w-full">
+                <SelectValue placeholder="Select element type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="logo">Logo</SelectItem>
+                <SelectItem value="userImage">User Image</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="address">Address</SelectItem>
+                <SelectItem value="phone">Phone</SelectItem>
+              </SelectContent>
+              </Select>
             </div>
           </div>
         )}
