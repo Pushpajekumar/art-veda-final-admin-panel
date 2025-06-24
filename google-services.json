@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "164187031742",
+    "project_id": "artveda-ff4d5",
+    "storage_bucket": "artveda-ff4d5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:164187031742:android:f98eef11aea526d4bbf6ef",
+        "android_client_info": {
+          "package_name": "com.evolcrm.artveda"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJCbWruQOKcPWy2ZbOj1f5Z5voU75EixA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
