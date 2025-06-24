@@ -152,23 +152,95 @@ export default function SendNotificationForm({
           throw new Error(result.error || `Server error: ${response.status}`);
         }
 
+        // Enhanced response handling with better error detection
+        const {
+          sentTo = 0,
+          failed = 0,
+          total = 0,
+          success = false,
+          processingStats,
+        } = result;
+
+        // Check for processing issues
+        if (processingStats?.resultsMismatch) {
+          console.warn("Results mismatch detected:", processingStats);
+        }
+
         // Reset form after successful submission
         form.reset();
 
-        const successMessage =
-          result.failed > 0
-            ? `Notification sent to ${result.sentTo} users (${result.failed} failed)`
-            : `Notification sent successfully to ${result.sentTo} users!`;
+        // More nuanced success/error messaging
+        if (success && sentTo > 0) {
+          if (failed > 0) {
+            const failureRate = Math.round((failed / total) * 100);
+            const message = `Notification sent to ${sentTo} users (${failed} failed - ${failureRate}% failure rate)`;
 
-        setStatus({
-          type: result.failed > 0 ? "error" : "success",
-          message: successMessage,
-        });
+            setStatus({
+              type: failureRate > 50 ? "error" : "success",
+              message,
+            });
 
-        if (result.failed === 0) {
-          onSuccess();
+            if (failureRate > 50) {
+              onError(
+                new Error(
+                  `High failure rate: ${failed}/${total} notifications failed. Check token validity.`
+                )
+              );
+            } else {
+              onSuccess();
+              toast.success(
+                `Notification sent to ${sentTo} users with ${failed} failures`
+              );
+            }
+          } else {
+            setStatus({
+              type: "success",
+              message: `Notification sent successfully to all ${sentTo} users!`,
+            });
+            onSuccess();
+            toast.success(
+              `Notification sent successfully to all ${sentTo} users!`
+            );
+          }
+        } else if (sentTo === 0 && total > 0) {
+          // All notifications failed
+          setStatus({
+            type: "error",
+            message: `All ${total} notifications failed to send. Please check token validity.`,
+          });
+          onError(
+            new Error(
+              `All notifications failed: ${
+                result.errorBreakdown
+                  ? JSON.stringify(result.errorBreakdown)
+                  : "Unknown reasons"
+              }`
+            )
+          );
+        } else if (sentTo === 0 && total === 0) {
+          // No notifications were processed
+          setStatus({
+            type: "error",
+            message:
+              "No notifications were processed. Please check your configuration.",
+          });
+          onError(new Error("No notifications were processed"));
         } else {
-          onError(new Error(`${result.failed} notifications failed to send`));
+          // Unexpected state
+          console.warn("Unexpected notification result state:", result);
+          setStatus({
+            type: "error",
+            message: "Unexpected response from notification service.",
+          });
+          onError(new Error("Unexpected notification service response"));
+        }
+
+        // Log additional debug info
+        if (
+          result.errorBreakdown &&
+          Object.keys(result.errorBreakdown).length > 0
+        ) {
+          console.log("Error breakdown:", result.errorBreakdown);
         }
       } catch (error) {
         console.error("Error sending notification:", error);
@@ -183,6 +255,7 @@ export default function SendNotificationForm({
           message: errorMessage,
         });
         onError(error instanceof Error ? error : new Error(errorMessage));
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }

@@ -20,31 +20,65 @@ export default function NotificationsPage() {
         throw new Error("Users collection ID not configured");
       }
 
-      // Fetch all users with push tokens
+      // Fetch all users with push tokens - get more fields to debug
       const response = await database.listDocuments(
         process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!,
         process.env.NEXT_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
         [
-          Query.select(["pushToken", "expoPushToken", "fcmToken"]),
-          Query.limit(1000), // Get up to 1000 users with tokens
+          Query.select(["expoToken", "name", "email"]), // Add name and email for better debugging
+          Query.limit(1000), // Increase limit to get more users
         ]
       );
 
-      const tokens = response.documents
-        .map(
-          (user: any) => user.pushToken || user.expoPushToken || user.fcmToken
-        )
+      console.log("Raw user data from database:", response.documents.slice(0, 3));
+
+      // Extract tokens with better error logging
+      const tokensWithUsers = response.documents
+        .map((user: any) => {
+          const token = user.expoToken;
+          const userIdentifier = user.name || user.email || user.$id;
+
+          if (token) {
+            console.log(`User ${userIdentifier} has token:`, token.substring(0, 30) + "...");
+            return { token, user: userIdentifier };
+          } else {
+            console.log(`User ${userIdentifier} has no valid token`);
+            return null;
+          }
+        })
         .filter(Boolean);
 
-      setUserTokens(tokens);
+      const tokens = tokensWithUsers.map((item) => item.token);
 
-      if (tokens.length === 0) {
+      console.log(`Extracted ${tokens.length} tokens from ${response.documents.length} users`);
+
+      // Log token format validation with better details
+      const validationResults = tokens.map((token: string) => {
+        const isValid = /^ExponentPushToken\[[a-zA-Z0-9_-]+\]$/.test(token) ||
+          /^ExpoPushToken\[[a-zA-Z0-9_-]+\]$/.test(token);
+        return { token: token.substring(0, 30) + "...", isValid };
+      });
+
+      const validTokens = tokens.filter((token: string) => {
+        const isValid = /^ExponentPushToken\[[a-zA-Z0-9_-]+\]$/.test(token) ||
+          /^ExpoPushToken\[[a-zA-Z0-9_-]+\]$/.test(token);
+        if (!isValid) {
+          console.log("Invalid token format:", token.substring(0, 30) + "...");
+        }
+        return isValid;
+      });
+
+      console.log(`${validTokens.length} tokens have valid format, ${tokens.length - validTokens.length} have invalid format`);
+
+      setUserTokens(validTokens);
+
+      if (validTokens.length === 0) {
         setError(
-          "No users with push tokens found. Make sure users have registered for push notifications."
+          "No users with valid push tokens found. Make sure users have registered for push notifications and tokens are in the correct format."
         );
       }
 
-      console.log(`Found ${tokens.length} user tokens from database`);
+      console.log(`Found ${validTokens.length} valid user tokens from database`);
     } catch (error) {
       console.error("Error fetching user tokens:", error);
       setError(
@@ -61,12 +95,13 @@ export default function NotificationsPage() {
   }, [fetchUserTokens]);
 
   const handleNotificationSuccess = useCallback(() => {
-    toast.success("Notification sent successfully to all users!");
+    console.log("Notification success callback triggered");
+    toast.success("Notification sent successfully!");
   }, []);
 
   const handleNotificationError = useCallback((error: Error) => {
-    console.error("Notification error:", error);
-    toast.error(`Failed to send notification: ${error.message}`);
+    console.error("Notification error callback triggered:", error);
+    toast.error(`Notification failed: ${error.message}`);
   }, []);
 
   const handleRetry = useCallback(() => {
@@ -117,7 +152,7 @@ export default function NotificationsPage() {
         <h1 className="text-3xl font-bold">Push Notifications</h1>
       </div>
 
-      {/* User Stats Card */}
+      {/* Enhanced User Stats Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -131,7 +166,7 @@ export default function NotificationsPage() {
               <p className="text-2xl font-bold text-primary">
                 {userTokens.length}
               </p>
-              <p className="text-sm text-gray-600">Users with Push Tokens</p>
+              <p className="text-sm text-gray-600">Valid Push Tokens</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-green-600">
@@ -146,6 +181,28 @@ export default function NotificationsPage() {
               <p className="text-sm text-gray-600">Service Status</p>
             </div>
           </div>
+
+          {/* Debug Information */}
+          {userTokens.length > 0 && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-md">
+              <p className="text-xs text-blue-700 font-medium">
+                Debug Information:
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                Sample token: {userTokens[0]?.substring(0, 40)}...
+              </p>
+              <p className="text-xs text-blue-600">
+                Token format validation:{" "}
+                {userTokens.every(
+                  (token) =>
+                    /^ExponentPushToken\[[a-zA-Z0-9_-]+\]$/.test(token) ||
+                    /^ExpoPushToken\[[a-zA-Z0-9_-]+\]$/.test(token)
+                )
+                  ? "All tokens valid"
+                  : "Some tokens invalid"}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
