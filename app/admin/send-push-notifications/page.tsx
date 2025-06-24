@@ -48,7 +48,7 @@ export default function NotificationsPage() {
         })
         .filter(Boolean);
 
-      const tokens = tokensWithUsers.map((item) => item.token);
+      const tokens = tokensWithUsers.map((item) => item!.token);
 
       console.log(`Extracted ${tokens.length} tokens from ${response.documents.length} users`);
 
