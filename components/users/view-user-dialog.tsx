@@ -17,25 +17,13 @@ import {
   Phone,
   Calendar,
   Crown,
-  User,
+  User as UserIcon,
   MapPin,
   Briefcase,
   Users,
 } from "lucide-react";
-import { formatDate } from "./data-table"; // Assuming this function is correctly defined elsewhere
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  isPremium: boolean;
-  createdAt: string;
-  address?: string;
-  occupation?: string;
-  gender?: string;
-  profileImage?: string;
-}
+import { formatDate } from "./data-table";
+import { User } from "./columns"; // Import User type from columns for consistency
 
 interface ViewUserDialogProps {
   user: User;
@@ -44,124 +32,149 @@ interface ViewUserDialogProps {
 export function ViewUserDialog({ user }: ViewUserDialogProps) {
   const [open, setOpen] = useState(false);
 
-  const infoItems = [
-    {
-      icon: Phone,
-      label: "Phone Number",
-      value: user.phone || "Not provided",
-    },
-    {
-      icon: Users,
-      label: "Gender",
-      value: user.gender || "Not specified",
-    },
-    {
-      icon: MapPin,
-      label: "Address",
-      value: user.address || "Not provided",
-    },
-    {
-      icon: Briefcase,
-      label: "Occupation",
-      value: user.occupation || "Not specified",
-    },
-  ];
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
           size="sm"
-          className="text-blue-600 hover:text-blue-700 border-blue-300 hover:border-blue-400"
+          className="text-blue-600 hover:text-blue-800"
         >
-          <Eye className="h-4 w-4 mr-2" />
+          <Eye className="h-4 w-4 mr-1" />
           View
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto p-0">
-        <DialogHeader className="p-6 pb-4 border-b">
-          <DialogTitle className="text-xl font-semibold flex items-center gap-2 text-gray-800">
-            <User className="h-5 w-5 text-blue-600" />
-            User Profile
+      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <UserIcon className="h-5 w-5" />
+            User Details
           </DialogTitle>
-          <DialogDescription className="text-sm text-gray-500">
-            Detailed information for {user.name}.
+          <DialogDescription>
+            Complete information for this user account
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-6 space-y-6">
-          {/* User Avatar & Basic Info */}
-          <div className="flex flex-col items-center text-center space-y-2">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-md">
+        <div className="space-y-6 py-4">
+          {/* User Avatar/Initial */}
+          <div className="flex justify-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
               {user.name?.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                {user.name}
-              </h2>
-              <p className="text-sm text-blue-600 flex items-center justify-center gap-1.5">
-                <Mail className="h-4 w-4 text-gray-400" />
-                {user.email}
-              </p>
-            </div>
           </div>
 
-          {/* Detailed Information */}
+          {/* User Information */}
           <div className="space-y-4">
-            {infoItems.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-3 p-3 bg-slate-50 rounded-md"
-              >
-                <item.icon className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+            {/* Name */}
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <UserIcon className="h-5 w-5 text-gray-500" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">Full Name</p>
+                <p className="text-base font-semibold text-gray-900">
+                  {user.name}
+                </p>
+              </div>
+            </div>
+
+            {/* Email */}
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Mail className="h-5 w-5 text-gray-500" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Email Address
+                </p>
+                <p className="text-base text-gray-900">{user.email}</p>
+              </div>
+            </div>
+
+            {/* Phone */}
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Phone className="h-5 w-5 text-gray-500" />
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Phone Number
+                </p>
+                <p className="text-base text-gray-900">
+                  {user.phone || "Not provided"}
+                </p>
+              </div>
+            </div>
+
+            {/* Gender */}
+            {user.gender && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <Users className="h-5 w-5 text-gray-500" />
                 <div>
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {item.label}
-                  </p>
-                  <p className="text-sm text-gray-800">{item.value}</p>
+                  <p className="text-sm font-medium text-gray-500">Gender</p>
+                  <p className="text-base text-gray-900">{user.gender}</p>
                 </div>
               </div>
-            ))}
-          </div>
+            )}
 
-          {/* Account Type & Joined Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
-            <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-md">
-              <Crown className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+            {/* Address */}
+            {user.address && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <MapPin className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Address</p>
+                  <p className="text-base text-gray-900">{user.address}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Occupation */}
+            {user.occupation && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <Briefcase className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    Occupation
+                  </p>
+                  <p className="text-base text-gray-900">{user.occupation}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Premium Status */}
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Crown className="h-5 w-5 text-gray-500" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-500">
                   Account Type
                 </p>
-                <Badge
-                  variant={user.isPremium ? "default" : "secondary"}
-                  className={`mt-1 text-xs font-medium ${
-                    user.isPremium
-                      ? "bg-yellow-400 hover:bg-yellow-500 text-yellow-900"
-                      : "bg-gray-200 text-gray-700"
-                  }`}
-                >
-                  {user.isPremium ? "Premium Member" : "Free User"}
-                </Badge>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge
+                    variant={user.isPremium ? "default" : "secondary"}
+                    className={
+                      user.isPremium ? "bg-yellow-500 hover:bg-yellow-600" : ""
+                    }
+                  >
+                    {user.isPremium ? "Premium Member" : "Free User"}
+                  </Badge>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-md">
-              <Calendar className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+            {/* Created Date */}
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Calendar className="h-5 w-5 text-gray-500" />
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <p className="text-sm font-medium text-gray-500">
                   Member Since
                 </p>
-                <p className="text-sm text-gray-800">
-                  {formatDate(user.createdAt)}
+                <p className="text-base text-gray-900">
+                  {formatDate(user.$createdAt)}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {new Date(user.$createdAt).toLocaleDateString()}
                 </p>
               </div>
             </div>
           </div>
 
           {/* User ID */}
-          <div className="pt-4 text-center">
-            <p className="text-xs text-gray-400">User ID: {user.id}</p>
+          <div className="pt-4 border-t">
+            <p className="text-xs text-gray-500">User ID: {user.id}</p>
           </div>
         </div>
       </DialogContent>

@@ -5,20 +5,26 @@ import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Crown, Mail, Phone, User } from "lucide-react";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { ViewUserDialog } from "./view-user-dialog";
+import { EditUserDialog } from "./edit-user-dialog";
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
+// Define your user type to match the page - making phone optional for consistency
 export type User = {
   id: string;
   name: string;
   email: string;
-  phone: string;
+  phone?: string; // Changed to optional to match edit-user-dialog
   isPremium: boolean;
   $createdAt: string;
   profileImage?: string;
+  address?: string;
+  occupation?: string;
+  gender?: string;
 };
 
-export const columns: ColumnDef<User>[] = [
+export const createColumns = (
+  onUserUpdated?: (updatedUser: User) => void
+): ColumnDef<User>[] => [
   {
     accessorKey: "profileImage",
     header: "Profile",
@@ -65,7 +71,7 @@ export const columns: ColumnDef<User>[] = [
       <div className="flex items-center space-x-2">
         <Phone className="h-4 w-4 text-gray-500" />
         <span className="text-sm text-gray-600 dark:text-gray-300">
-          {row.original.phone}
+          {row.original.phone || "—"}
         </span>
       </div>
     ),
@@ -100,4 +106,23 @@ export const columns: ColumnDef<User>[] = [
       );
     },
   },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const user = row.original;
+
+      return (
+        <div className="flex items-center space-x-2">
+          <ViewUserDialog user={user} />
+          {onUserUpdated && (
+            <EditUserDialog user={user} onUserUpdated={onUserUpdated} />
+          )}
+        </div>
+      );
+    },
+  },
 ];
+
+// Default columns for backward compatibility
+export const columns = createColumns();

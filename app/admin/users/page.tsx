@@ -1,18 +1,8 @@
 "use client";
 import { database, Query } from "@/appwrite";
-import { columns } from "@/components/users/columns";
+import { createColumns, User } from "@/components/users/columns"; // Import User type from columns
 import { DataTable } from "@/components/users/data-table";
 import React, { useEffect, useState } from "react";
-
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  isPremium: boolean;
-  $createdAt: string;
-  profileImage?: string;
-};
 
 const USERS_PER_PAGE = 25;
 
@@ -22,6 +12,14 @@ const Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+
+  const handleUserUpdated = (updatedUser: User) => {
+    setUsers((prev) =>
+      prev.map((user) => (user.id === updatedUser.id ? updatedUser : user))
+    );
+  };
+
+  const columns = createColumns(handleUserUpdated);
 
   const fetchUsers = async (page: number) => {
     try {
@@ -41,12 +39,15 @@ const Page = () => {
       // Transform Appwrite documents to User objects
       const userData: User[] = usersData.documents.map((doc) => ({
         id: doc.$id,
-        name: doc.name,
-        email: doc.email,
-        phone: doc.phone,
-        isPremium: doc.isPremium,
+        name: doc.name || "",
+        email: doc.email || "",
+        phone: doc.phone || undefined, // Keep as optional
+        isPremium: doc.isPremium || false,
         $createdAt: doc.$createdAt,
         profileImage: doc.profileImage || "",
+        address: doc.address || "",
+        occupation: doc.occupation || "",
+        gender: doc.gender || "",
       }));
 
       console.log(userData);

@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Edit, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { database } from "@/appwrite";
+import { User } from "./columns"; // Import User type from columns for consistency
 
 const editUserSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -35,23 +36,10 @@ const editUserSchema = z.object({
   address: z.string().optional(),
   occupation: z.string().optional(),
   gender: z.string().optional(),
-  // isPremium: z.boolean(),
+  isPremium: z.boolean(),
 });
 
 type EditUserFormData = z.infer<typeof editUserSchema>;
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  isPremium: boolean;
-  createdAt: string;
-  address?: string;
-  occupation?: string;
-  gender?: string;
-  profileImage?: string;
-}
 
 interface EditUserDialogProps {
   user: User;
@@ -71,7 +59,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
       address: user.address || "",
       occupation: user.occupation || "",
       gender: user.gender || "",
-      // isPremium: user.isPremium || false,
+      isPremium: user.isPremium || false,
     },
   });
 
@@ -89,7 +77,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
           address: data.address || "",
           occupation: data.occupation || "",
           gender: data.gender || "",
-          // isPremium: data.isPremium,
+          isPremium: data.isPremium,
         }
       );
 
@@ -97,11 +85,11 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
         ...user,
         name: data.name,
         email: data.email,
-        phone: data.phone || "",
+        phone: data.phone, // Keep as optional
         address: data.address || "",
         occupation: data.occupation || "",
         gender: data.gender || "",
-        // isPremium: data.isPremium,
+        isPremium: data.isPremium,
       };
 
       onUserUpdated(updatedUser);
@@ -118,11 +106,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-green-600 hover:text-green-800"
-        >
+        <Button variant="outline" size="sm" className="text-green-600 hover:text-green-800">
           <Edit className="h-4 w-4 mr-1" />
           Edit
         </Button>
@@ -149,9 +133,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
               disabled={isLoading}
             />
             {form.formState.errors.name && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.name.message}
-              </p>
+              <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
             )}
           </div>
 
@@ -166,9 +148,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
               disabled={isLoading}
             />
             {form.formState.errors.email && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.email.message}
-              </p>
+              <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
             )}
           </div>
 
@@ -187,7 +167,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
           <div className="space-y-2">
             <Label htmlFor="gender">Gender</Label>
             <Select
-              value={form.watch("gender") || ""}
+              value={form.watch("gender") || user.gender || ""}
               onValueChange={(value) => form.setValue("gender", value)}
               disabled={isLoading}
             >
@@ -198,9 +178,7 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
                 <SelectItem value="male">Male</SelectItem>
                 <SelectItem value="female">Female</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
-                <SelectItem value="prefer_not_to_say">
-                  Prefer not to say
-                </SelectItem>
+                <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -255,7 +233,11 @@ export function EditUserDialog({ user, onUserUpdated }: EditUserDialogProps) {
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading} className="flex-1">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1"
+            >
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
