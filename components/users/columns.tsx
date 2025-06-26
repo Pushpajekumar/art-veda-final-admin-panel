@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ViewUserDialog } from "./view-user-dialog";
 import { EditUserDialog } from "./edit-user-dialog";
+import { ViewUserDownloadHistory } from "./view-user-download-history-dialog";
 
 // Define your user type to match the page - making phone optional for consistency
 export type User = {
@@ -115,6 +116,7 @@ export const createColumns = (
       return (
         <div className="flex items-center space-x-2">
           <ViewUserDialog user={user} />
+          <ViewUserDownloadHistory user={user} />
           {onUserUpdated && (
             <EditUserDialog user={user} onUserUpdated={onUserUpdated} />
           )}
