@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { ViewUserDialog } from "./view-user-dialog";
 import { EditUserDialog } from "./edit-user-dialog";
 import { ViewUserDownloadHistory } from "./view-user-download-history-dialog";
+import { AssignFramesToUser } from "./assign-frame-to-user";
 
 // Define your user type to match the page - making phone optional for consistency
 export type User = {
@@ -120,6 +121,7 @@ export const createColumns = (
           {onUserUpdated && (
             <EditUserDialog user={user} onUserUpdated={onUserUpdated} />
           )}
+          <AssignFramesToUser user={user} />
         </div>
       );
     },
