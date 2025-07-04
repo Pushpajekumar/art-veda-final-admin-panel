@@ -18,7 +18,7 @@ import {
 import { toast } from "sonner";
 import Image from "next/image";
 
-const IMAGES_PER_PAGE = 6;
+const IMAGES_PER_PAGE = 24;
 
 function UploadPanel() {
   const { canvas } = useEditorStore();

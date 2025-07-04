@@ -8,6 +8,7 @@ import {
   Youtube,
   Camera,
   Plus,
+  MessageCircle,
 } from "lucide-react";
 import { CustomeButton } from "./custome-create-button";
 import { Button } from "../ui/button";
@@ -22,6 +23,12 @@ const postTypes = [
     icon: Instagram,
     width: 1080,
     height: 1080,
+  },
+  {
+    name: "WhatsApp Status",
+    icon: MessageCircle,
+    width: 1080,
+    height: 1920,
   },
 ];
 
@@ -101,9 +108,12 @@ const TypeOfPost: React.FC<TypeOfPostProps> = ({ onSelectPostType }) => {
                 <div className="mb-2">
                   <IconComponent size={24} />
                 </div>
-                <span className="text-sm">{type.name}</span>
+                <span className="text-sm text-center">{type.name}</span>
                 <span className="text-xs text-gray-500">
                   {type.width}×{type.height}
+                </span>
+                <span className="text-xs text-gray-400 mt-1">
+                  {type.height > type.width ? "Portrait" : "Square"}
                 </span>
               </div>
             );

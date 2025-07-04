@@ -80,6 +80,34 @@ export default function CreateFrame() {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
+            <Label htmlFor="preset">Frame Preset</Label>
+            <select
+              id="preset"
+              className="border rounded px-3 py-2"
+              value={
+          width === 1080 && height === 1080
+            ? "general"
+            : width === 1080 && height === 1920
+            ? "whatsapp"
+            : ""
+              }
+              onChange={(e) => {
+          const preset = e.target.value;
+          if (preset === "general") {
+            setWidth(1080);
+            setHeight(1080);
+          } else if (preset === "whatsapp") {
+            setWidth(1080);
+            setHeight(1920);
+          }
+              }}
+            >
+              <option value="">Custom</option>
+              <option value="general">General Frame (1080x1080)</option>
+              <option value="whatsapp">WhatsApp Status (1080x1920)</option>
+            </select>
+          </div>
+          <div className="grid gap-2">
             <Label htmlFor="name">Frame Name</Label>
             <Input
               id="name"
@@ -92,19 +120,19 @@ export default function CreateFrame() {
             <div className="grid gap-2">
               <Label htmlFor="width">Width (px)</Label>
               <Input
-                id="width"
-                type="number"
-                value={width}
-                onChange={(e) => setWidth(Number(e.target.value))}
+          id="width"
+          type="number"
+          value={width}
+          onChange={(e) => setWidth(Number(e.target.value))}
               />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="height">Height (px)</Label>
               <Input
-                id="height"
-                type="number"
-                value={height}
-                onChange={(e) => setHeight(Number(e.target.value))}
+          id="height"
+          type="number"
+          value={height}
+          onChange={(e) => setHeight(Number(e.target.value))}
               />
             </div>
           </div>
