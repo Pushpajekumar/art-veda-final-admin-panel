@@ -5,7 +5,7 @@ interface NotificationPayload {
   sound: string;
   title: string;
   body: string;
-  data?: any;
+  image?: string;
 }
 
 // Function to validate Expo push token format
@@ -28,7 +28,7 @@ function chunkArray<T>(array: T[], size: number): T[][] {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { title, body: content, channelId, sound, data, userTokens } = body;
+    const { title, body: content, sound, image, userTokens } = body;
 
     // Validate required fields
     if (!title || !content) {
@@ -78,9 +78,8 @@ export async function POST(req: Request) {
         sound: sound || "default",
         title,
         body: content,
-        data: {
-          channelId: channelId || "default",
-          ...data,
+        richContent: {
+          image: image || "",
         },
       })
     );

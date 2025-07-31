@@ -37,23 +37,7 @@ const FormSchema = z.object({
   }),
   channelId: z.string().optional(),
   sound: z.string().optional(),
-  data: z
-    .string()
-    .optional()
-    .refine(
-      (val) => {
-        if (!val) return true;
-        try {
-          const parsed = JSON.parse(val);
-          return typeof parsed === "object";
-        } catch {
-          return false;
-        }
-      },
-      {
-        message: "Data must be valid JSON",
-      }
-    ),
+  image: z.string().optional(),
 });
 
 interface SendNotificationFormProps {
@@ -83,7 +67,7 @@ export default function SendNotificationForm({
       body: "",
       channelId: "default",
       sound: "default",
-      data: "",
+      image: "",
     },
   });
 
@@ -98,25 +82,6 @@ export default function SendNotificationForm({
       setStatus({ type: null, message: "" });
 
       try {
-        // Prepare data payload
-        let parsedData = undefined;
-        if (data.data && data.data.trim()) {
-          try {
-            parsedData = JSON.parse(data.data);
-          } catch (jsonError) {
-            toast.error("Invalid JSON format in data field");
-            setLoading(false);
-            return;
-          }
-        }
-
-        console.log("Sending notification with data:", {
-          title: data.title,
-          body: data.body,
-          userCount: userTokens.length,
-          hasData: !!parsedData,
-        });
-
         const response = await fetch("/api/send-notification", {
           method: "POST",
           headers: {
@@ -127,7 +92,7 @@ export default function SendNotificationForm({
             body: data.body,
             channelId: data.channelId || "default",
             sound: data.sound || "default",
-            data: parsedData,
+            image: data.image || "",
             userTokens,
           }),
         });
@@ -353,20 +318,22 @@ export default function SendNotificationForm({
               />
               <FormField
                 control={form.control}
-                name="data"
+                name="image"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-medium">Data (JSON)</FormLabel>
+                    <FormLabel className="font-medium">Image URL</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder='{"key": "value"}'
-                        className="min-h-32 font-mono text-sm resize-y transition-all focus-visible:ring-offset-2"
-                        {...field}
+                      <Input
+                        placeholder="Enter image URL"
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        className="transition-all focus-visible:ring-offset-2"
                       />
                     </FormControl>
                     <FormDescription className="text-xs">
-                      Additional data in valid JSON format to be sent with the
-                      notification.
+                      The URL of the image to be included in the notification.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
