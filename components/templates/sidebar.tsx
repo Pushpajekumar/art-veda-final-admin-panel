@@ -7,6 +7,7 @@ import {
   Upload,
   Image,
   Frame,
+  Video,
 } from "lucide-react";
 import { useState, useCallback } from "react";
 
@@ -15,6 +16,7 @@ import TextPanel from "./text";
 import UploadPanel from "./upload";
 import BackgroundPanel from "./background";
 import Frames from "./frames";
+import VideoPanel from "./video-panel";
 
 function Sidebar() {
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
@@ -44,6 +46,12 @@ function Sidebar() {
       icon: Frame,
       label: "Frames",
       panel: Frames,
+    },
+    {
+      id: "video",
+      icon: Video,
+      label: "Video",
+      panel: VideoPanel,
     },
   ];
 

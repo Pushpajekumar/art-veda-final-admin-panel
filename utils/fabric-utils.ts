@@ -3,7 +3,6 @@ import {
   FabricImage,
   IText,
   FabricObject,
-  Object as FabricObjectClass,
 } from "fabric";
 
 interface TextOptions {
@@ -145,6 +144,37 @@ export const addImageToCanvas = async (
   }
 };
 
+export const addVideoToCanvas = async (
+  canvas: Canvas | null,
+  videoUrl: string
+): Promise<FabricObject | null> => {
+  if (!canvas) return null;
+
+  try {
+    const videoElement = document.createElement("video");
+    videoElement.src = videoUrl;
+    videoElement.crossOrigin = "anonymous";
+    videoElement.loop = true;
+    videoElement.muted = true;
+
+    const videoObject = new FabricImage(videoElement, {
+      id: `video-${Date.now()}`,
+      left: 100,
+      top: 100,
+      scaleX: 1,
+      scaleY: 1,
+    });
+    canvas.add(videoObject);
+    canvas.setActiveObject(videoObject);
+    canvas.renderAll();
+
+    return videoObject;
+  } catch (error) {
+    console.error("Error adding video");
+    return null;
+  }
+};
+
 export const deletedSelectedObject = async (
   canvas: Canvas | null
 ): Promise<boolean> => {
@@ -216,11 +246,12 @@ export function registerCustomProperties() {
   ];
 
   // Override toObject method to include our custom properties
-  FabricObjectClass.prototype.toObject = (function (toObject) {
+  // Override toObject method to include our custom properties
+  FabricObject.prototype.toObject = (function (toObject) {
     return function (this: FabricObject, propertiesToInclude = []) {
       return toObject.call(this, propertiesToInclude.concat(additionalProps));
     };
-  })(FabricObjectClass.prototype.toObject);
+  })(FabricObject.prototype.toObject);
 }
 
 // Add a helper function to initialize objects with default properties

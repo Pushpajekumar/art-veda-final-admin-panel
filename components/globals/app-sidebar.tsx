@@ -9,6 +9,7 @@ import {
   LogOut,
   Calendar,
   Bell,
+  Video,
 } from "lucide-react";
 import {
   Sidebar,
@@ -68,6 +69,11 @@ const items = [
     title: "Send Push Notifications",
     url: "/admin/send-push-notifications",
     icon: Bell,
+  },
+  {
+    title: "Testing Video",
+    url: "/admin/testing-video",
+    icon: Video,
   },
 ];
 
