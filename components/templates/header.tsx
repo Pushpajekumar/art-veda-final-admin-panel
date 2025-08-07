@@ -106,7 +106,7 @@ function Header({ isFrame = false }) {
 
         console.log(imageUrl);
 
-        // Include lock properties in serialization
+        // Include lock properties and video properties in serialization
         const propertiesToInclude = [
           "id",
           "filters",
@@ -118,6 +118,9 @@ function Header({ isFrame = false }) {
           "selectable",
           "hasControls",
           "locked",
+          "label",
+          "isVideo",
+          "originalVideoUrl",
         ];
 
         const canvasData = canvas.toObject(propertiesToInclude);

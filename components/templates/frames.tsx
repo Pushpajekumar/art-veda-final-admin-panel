@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { useEffect } from "react";
 import { useEditorStore } from "@/store/editor-store";
 import { toast } from "sonner";
-import * as fabric from "fabric";
+import { restoreVideoObjects } from "@/utils/fabric-utils";
 
 interface Frame {
   $id: string;
@@ -27,6 +27,7 @@ interface FramesResponse {
 }
 
 const Frames = () => {
+  const { canvas } = useEditorStore();
   const [frames, setFrames] = React.useState<FramesResponse>({
     documents: [],
     total: 0,
@@ -35,29 +36,60 @@ const Frames = () => {
   const [error, setError] = React.useState<string | null>(null);
 
   const applyFrame = async (frame: Frame) => {
+    if (!canvas) {
+      toast.error("Canvas not available");
+      return;
+    }
+
     try {
       const frameData = JSON.parse(frame.template);
 
-      fabric.util
-        .enlivenObjects(frameData.objects)
-        .then((objects) => {
-          objects.forEach((obj: any) => {
-            if (!obj.hasOwnProperty("label")) {
-              obj.set({
-                label:
-                  obj.type === "text" ||
-                  obj.type === "i-text" ||
-                  obj.type === "textbox"
-                    ? `Text: ${(obj as any).text.substring(0, 10)}...`
-                    : `${obj.type || "Object"}`,
-              });
-            }
+      // Clear current canvas
+      canvas.clear();
+
+      // Set canvas background if specified in frame
+      if (frameData.background) {
+        canvas.backgroundColor = frameData.background;
+        canvas.renderAll();
+      }
+
+      // Import fabric for enliven
+      const { util } = await import("fabric");
+
+      // Enliven objects from frame data
+      const objects = await util.enlivenObjects(frameData.objects);
+
+      // Process each object before adding to canvas
+      objects.forEach((obj: any) => {
+        // Set default label if not present
+        if (!obj.hasOwnProperty("label")) {
+          obj.set({
+            label:
+              obj.type === "text" ||
+              obj.type === "i-text" ||
+              obj.type === "textbox"
+                ? `Text: ${(obj as any).text.substring(0, 10)}...`
+                : `${obj.type || "Object"}`,
           });
-        })
-        .catch((error: unknown) => {
-          console.error("Error applying frame objects:", error);
-          toast.error("Failed to apply frame objects");
+        }
+
+        // Add object to canvas
+        canvas.add(obj);
+      });
+
+      // Restore video objects if any
+      await restoreVideoObjects(canvas);
+
+      // Set canvas dimensions if specified in frame
+      if (frameData.width && frameData.height) {
+        canvas.setDimensions({
+          width: frameData.width,
+          height: frameData.height,
         });
+      }
+
+      canvas.renderAll();
+      toast.success("Frame applied successfully!");
     } catch (error: unknown) {
       console.error("Error applying frame:", error);
       toast.error("Failed to apply frame");

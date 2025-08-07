@@ -30,6 +30,10 @@ import {
   MoveUp,
   Trash,
   Underline,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
@@ -65,6 +69,13 @@ function Properties() {
 
   const [filter, setFilter] = useState("none");
   const [blur, setBlur] = useState(0);
+
+  // Video specific states
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isVideoMuted, setIsVideoMuted] = useState(true);
+  const [videoVolume, setVideoVolume] = useState(50);
+  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
+  const [videoDuration, setVideoDuration] = useState(0);
 
   useEffect(() => {
     if (!canvas) return;
@@ -103,7 +114,21 @@ function Properties() {
           setTextBackgroundColor(activeObject.backgroundColor || "");
           setLetterSpacing(activeObject.charSpacing || 0);
         } else if (activeObject.type === "image") {
-          setObjectType("image");
+          // Check if this is actually a video object
+          if (activeObject.isVideo) {
+            setObjectType("video");
+
+            // Initialize video-specific properties
+            if (activeObject.videoElement) {
+              setIsVideoPlaying(!activeObject.videoElement.paused);
+              setIsVideoMuted(activeObject.videoElement.muted);
+              setVideoVolume(activeObject.videoElement.volume * 100);
+              setVideoCurrentTime(activeObject.videoElement.currentTime);
+              setVideoDuration(activeObject.videoElement.duration || 0);
+            }
+          } else {
+            setObjectType("image");
+          }
 
           if (activeObject.filters && activeObject.filters.length > 0) {
             const filterObj = activeObject.filters[0];
@@ -211,6 +236,41 @@ function Properties() {
       canvas.off("selection:cleared", handleSelectionCleared);
     };
   }, [canvas]);
+
+  // Effect to handle video time updates
+  useEffect(() => {
+    if (
+      selectedObject &&
+      selectedObject.isVideo &&
+      selectedObject.videoElement
+    ) {
+      const video = selectedObject.videoElement;
+
+      const updateTime = () => {
+        setVideoCurrentTime(video.currentTime);
+      };
+
+      const updateDuration = () => {
+        setVideoDuration(video.duration);
+      };
+
+      const updatePlayState = () => {
+        setIsVideoPlaying(!video.paused);
+      };
+
+      video.addEventListener("timeupdate", updateTime);
+      video.addEventListener("loadedmetadata", updateDuration);
+      video.addEventListener("play", updatePlayState);
+      video.addEventListener("pause", updatePlayState);
+
+      return () => {
+        video.removeEventListener("timeupdate", updateTime);
+        video.removeEventListener("loadedmetadata", updateDuration);
+        video.removeEventListener("play", updatePlayState);
+        video.removeEventListener("pause", updatePlayState);
+      };
+    }
+  }, [selectedObject]);
 
   const updateObjectProperty = (property: string, value: any) => {
     if (!canvas || !selectedObject) return;
@@ -526,6 +586,76 @@ function Properties() {
     markAsModified();
   };
 
+  // Video control functions
+  const handleVideoPlayPause = () => {
+    if (
+      !selectedObject ||
+      !selectedObject.isVideo ||
+      !selectedObject.videoElement
+    )
+      return;
+
+    const video = selectedObject.videoElement;
+    if (video.paused) {
+      video
+        .play()
+        .then(() => {
+          setIsVideoPlaying(true);
+        })
+        .catch(console.error);
+    } else {
+      video.pause();
+      setIsVideoPlaying(false);
+    }
+  };
+
+  const handleVideoMute = () => {
+    if (
+      !selectedObject ||
+      !selectedObject.isVideo ||
+      !selectedObject.videoElement
+    )
+      return;
+
+    const video = selectedObject.videoElement;
+    video.muted = !video.muted;
+    setIsVideoMuted(video.muted);
+  };
+
+  const handleVideoVolumeChange = (value: number[]) => {
+    if (
+      !selectedObject ||
+      !selectedObject.isVideo ||
+      !selectedObject.videoElement
+    )
+      return;
+
+    const newVolume = value[0];
+    const video = selectedObject.videoElement;
+    video.volume = newVolume / 100;
+    setVideoVolume(newVolume);
+  };
+
+  const handleVideoSeek = (value: number[]) => {
+    if (
+      !selectedObject ||
+      !selectedObject.isVideo ||
+      !selectedObject.videoElement
+    )
+      return;
+
+    const newTime = value[0];
+    const video = selectedObject.videoElement;
+    video.currentTime = newTime;
+    setVideoCurrentTime(newTime);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
   if (!selectedObject) return null;
 
   return (
@@ -628,28 +758,31 @@ function Properties() {
           <div className="space-y-4">
             <div className="mb-4">
               <Label
-              htmlFor="elementLabel"
-              className="block text-sm font-medium mb-1"
+                htmlFor="elementLabel"
+                className="block text-sm font-medium mb-1"
               >
-              Element Label
+                Element Label
               </Label>
-              <Select value={objectLabel} onValueChange={(value) => {
-              setObjectLabel(value);
-              if (selectedObject) {
-                updateObjectProperty("label", value);
-              }
-              }}>
-              <SelectTrigger id="elementLabel" className="w-full">
-                <SelectValue placeholder="Select element type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="logo">Logo</SelectItem>
-                <SelectItem value="userImage">User Image</SelectItem>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="address">Address</SelectItem>
-                <SelectItem value="phone">Phone</SelectItem>
-              </SelectContent>
+              <Select
+                value={objectLabel}
+                onValueChange={(value) => {
+                  setObjectLabel(value);
+                  if (selectedObject) {
+                    updateObjectProperty("label", value);
+                  }
+                }}
+              >
+                <SelectTrigger id="elementLabel" className="w-full">
+                  <SelectValue placeholder="Select element type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="logo">Logo</SelectItem>
+                  <SelectItem value="userImage">User Image</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="address">Address</SelectItem>
+                  <SelectItem value="phone">Phone</SelectItem>
+                </SelectContent>
               </Select>
             </div>
           </div>
@@ -874,6 +1007,137 @@ function Properties() {
                 />
               </div>
             )}
+          </div>
+        )}
+        {objectType === "video" && (
+          <div className="space-y-4 p-4 border-t">
+            <h3 className="text-sm font-medium">Video Properties</h3>
+
+            {/* Video Controls */}
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleVideoPlayPause}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-8"
+                >
+                  {isVideoPlaying ? (
+                    <>
+                      <Pause className="w-4 h-4 mr-1" />
+                      Pause
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 mr-1" />
+                      Play
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleVideoMute}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-3"
+                >
+                  {isVideoMuted ? (
+                    <VolumeX className="w-4 h-4" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+
+              {/* Video Timeline */}
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label className="text-xs">Timeline</Label>
+                  <span className="text-xs">
+                    {formatTime(videoCurrentTime)} / {formatTime(videoDuration)}
+                  </span>
+                </div>
+                <Slider
+                  min={0}
+                  max={videoDuration || 100}
+                  step={0.1}
+                  value={[videoCurrentTime]}
+                  onValueChange={handleVideoSeek}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Volume Control */}
+              {!isVideoMuted && (
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label className="text-xs">Volume</Label>
+                    <span className="text-xs">{videoVolume}%</span>
+                  </div>
+                  <Slider
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[videoVolume]}
+                    onValueChange={handleVideoVolumeChange}
+                    className="w-full"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Border Controls for Video */}
+            <div className="space-y-2 pt-4 border-t">
+              <Label htmlFor="video-border-color" className="text-xs">
+                Border Color
+              </Label>
+              <div className="relative w-8 h-8 overflow-hidden rounded-md border">
+                <div
+                  className="absolute inset-0"
+                  style={{ backgroundColor: borderColor }}
+                />
+                <Input
+                  id="video-border-color"
+                  type="color"
+                  value={borderColor}
+                  onChange={handleBorderColorChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="video-border-width" className="text-xs">
+                Border Width
+              </Label>
+              <span className="text-xs mb-2">{borderWidth}px</span>
+              <Slider
+                id="video-border-width"
+                min={0}
+                max={20}
+                step={1}
+                value={[borderWidth]}
+                onValueChange={handleBorderWidthChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="video-border-style" className="text-xs">
+                Border Style
+              </Label>
+              <Select
+                value={borderStyle}
+                onValueChange={handleBorderStyleChange}
+              >
+                <SelectTrigger id="video-border-style" className="h-10">
+                  <SelectValue placeholder="Select Border Style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="solid">Solid</SelectItem>
+                  <SelectItem value="dashed">Dashed</SelectItem>
+                  <SelectItem value="dotted">Dotted</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         )}
         {objectType === "frame" && frameTextObjects.length > 0 && (
