@@ -340,7 +340,7 @@ const Editor = ({
 
             // Set dimensions at full size for better quality
             // Scaling down for display but keeping high resolution data
-            const displayScale = 0.5;
+            const displayScale = 1.5;
             const scaledWidth = canvasWidth * displayScale * 4;
             const scaledHeight = canvasHeight * displayScale * 4;
 
