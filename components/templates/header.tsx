@@ -26,7 +26,7 @@ import {
 } from "../ui/select";
 import { Label } from "../ui/label";
 
-function Header({ isFrame = false }) {
+function Header({ isFrame = false, isVideo = false }) {
   const {
     isEditing,
     setIsEditing,
@@ -83,10 +83,12 @@ function Header({ isFrame = false }) {
     if (!canvas) return;
     setIsLoading(true);
     try {
+      // Get the highest quality data URL with maximum resolution
       const dataUrl = canvas?.toDataURL({
         format: "png",
         quality: 1,
-        multiplier: 1,
+        multiplier: 2, // Increase multiplier for higher resolution
+        enableRetinaScaling: true, // Enable retina scaling for better quality
       });
 
       console.log(dataUrl);
@@ -129,7 +131,9 @@ function Header({ isFrame = false }) {
 
         if (imageUrl) {
           // Determine which collection to save to based on whether this is a frame or template
-          const collectionId = isFrame
+            const collectionId = isVideo
+            ? (process.env.NEXT_PUBLIC_APPWRITE_VIDEO_COLLECTION_ID as string)
+            : isFrame
             ? (process.env.NEXT_PUBLIC_APPWRITE_FRAMES_COLLECTION_ID as string)
             : (process.env.NEXT_PUBLIC_APPWRITE_POSTS_COLLECTION_ID as string);
 
@@ -158,10 +162,10 @@ function Header({ isFrame = false }) {
       }
     } catch (error) {
       console.error("Error saving design", error);
-      toast.error(`Failed to save ${isFrame ? "frame" : "design"}`);
-    } finally {
+      toast.error(`Failed to save ${isVideo ? "video" : isFrame ? "frame" : "design"}`);
+        } finally {
       setIsLoading(false);
-      toast.success(`${isFrame ? "Frame" : "Design"} saved successfully`);
+      toast.success(`${isVideo ? "Video" : isFrame ? "Frame" : "Design"} saved successfully`);
     }
   };
 
@@ -193,7 +197,7 @@ function Header({ isFrame = false }) {
             className="w-full bg-white text-neutral-900 border border-neutral-300 focus:ring-0 focus:border-neutral-500"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={isFrame ? "Frame Name" : "Design Name"}
+            placeholder={isVideo ? "Video Name" : isFrame ? "Frame Name" : "Design Name"}
           />
 
           {/* Add subcategory selector */}
@@ -206,12 +210,12 @@ function Header({ isFrame = false }) {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Categories</SelectLabel>
-                {subCategories.map((category) => (
-                  <SelectItem key={category.$id} value={category.$id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
+          <SelectLabel>Categories</SelectLabel>
+          {subCategories.map((category) => (
+            <SelectItem key={category.$id} value={category.$id}>
+              {category.name}
+            </SelectItem>
+          ))}
               </SelectGroup>
             </SelectContent>
           </Select>
